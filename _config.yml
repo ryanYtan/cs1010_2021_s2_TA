@@ -30,3 +30,4 @@ github_username:  ryanYtan
 theme: minima
 plugins:
   - jekyll-feed
+  - premonition
