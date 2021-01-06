@@ -1,0 +1,321 @@
+---
+layout: post
+title:  "Assignment 1"
+date:   2021-01-01 00:00:00 +0800
+---
+
+Congratulations on completing your first assignment. As it's likely
+your first time writing code, and in C no less, that you've struggled
+with the many syntax errors thrown by the compiler. Over time, the
+difficulty will be less on C syntax and more on figuring out what
+code to write to solve the algorithm.
+
+The main focus of Assignment 1 is on
+**breaking down problems into smaller sub-problems**. This skill
+will be necessary in every non-trivial programming problem, so
+hopefully you have thought about this in the process of solving each
+problem.
+
+## Question 1: Box
+![box](/assets/images/box.jpg){:height="150px"}
+
+In this question, our goal is to find the surface area and
+"diagonal" of a box (cuboid). Since this question in particular is
+mainly about C data-typing, I have to give real code for this question.
+
+### Surface Area
+For the surface area, the question asks you to define a new function
+called `area_of_rectangle`, then use this new function to calculate
+the surface area of the box. We can treat this function like a math
+function e.g $$A(l,w) = l \times w$$. The corresponding function in code
+will look like this:
+
+```c
+long area_of_rectangle(long length, long width)
+{
+    return length * width;
+}
+```
+
+It's implied that we should create a function that calculates the
+surface area of a box given its length, width and height:
+
+```c
+long surface_area(long length, long width, long height)
+{
+    return 2 * area_of_rectangle(length, width)
+            + 2 * area_of_rectangle(length, height)
+            + 2 * area_of_rectangle(width, height);
+}
+```
+
+Now we can call this function whenever we want to find the surface
+area of a box. Note that what we have done here is to break down
+the problem of "finding the surface area" into the smaller problem of
+"finding the area of a rectangle", then using the solution to the
+latter to solve the former.
+
+### Diagonal
+The diagonal is a bit more tricky, but not in the algorithmic sort
+of way.
+
+The diagonal of a box is the hypotenuse of the right-angled triangle
+formed by the *floor diagonal*, and the height of the box. Therefore,
+we need some way to find the hypotenuse of a right-angled triangle,
+given its base and height.
+
+The question wants you to modify the `hypotenuse_of` function shown
+in Unit 5 of the lecture. I've pasted it below:
+
+{% highlight c %}
+long square(long x)
+{
+    return x * x;
+}
+
+double hypotenuse_of(long base, long height)
+{
+    return sqrt(square(base) + square(height));
+}
+{% endhighlight %}
+
+The hint given is to pay attention to the *type* of the parameters
+and return value. We will see why later.
+
+We can calculate the floor diagonal by calling `hypotenuse_of(length,
+width)`, and assigning the result to a `double` variable. Then, we call
+`hypotenuse_of` again using `floor_diagonal` and `height` as inputs.
+Simple enough. However, we then run into a problem. What happens when
+we use the following (seemingly correct) code?
+
+{% highlight c %}
+double diagonal(long length, long width, long height)
+{
+    double floor_diagonal = hypotenuse_of(length, width);
+    return hypotenuse_of(floor_diagonal, height);
+}
+{% endhighlight %}
+
+You can try with a few inputs, but you will notice that it does not pass
+even the first test case, despite the logic being correct. The reason
+is that `floor_diagonal` is being *narrowed* (squished, truncated,
+etc) into a `long` when passed into the function `hypotenuse_of` in the
+second line of the above function.
+
+Remember that real number types such as `float` and `double`
+truncates the decimal part of the number when casted into an integer
+type `int` or `long`. So, the decimal part of `floor_diagonal` has been
+lost in the ether and is not considered in the computation.
+
+There's nothing we can do other than changing the types of the
+parameters taken by `hypotenuse_of`. As a result, we also have to
+change the parameters and return value of `square`. A complete
+solution is shown below:
+
+{% highlight c %}
+double square(double x) // change return value and params
+{
+    return x * x;
+}
+
+double hypotenuse_of(double base, double height) // change params
+{
+    return sqrt(square(base) + square(height));
+}
+
+double diagonal(long length, long width, long height)
+{
+    // need to constantly cast long to double to avoid compiler warnings
+    double floor_diagonal = hypotenuse_of((double)length, (double)width);
+    return hypotenuse_of(floor_diagonal, (double)height);
+}
+{% endhighlight %}
+
+A better solution may be to change all the types of the parameters of
+`diagonal` to `double` to avoid type-casting.
+
+### Formula
+The formula to calculate the diagonal is given by:
+
+$$
+D(l,w,h) = \sqrt{l^2 + w^2 + h^2}
+$$
+
+In the "real world", if you really needed a function to calculate a
+diagonal of a cuboid, doing it in one function to reduce dependencies
+is the more likely solution. For learning about function composition,
+however, the question was asked as such.
+
+## Question 2: Digits
+This question focuses on linear recursion, specifically, the
+"recursion" part of Unit 3.
+
+A recursive function is a function that calls itself, if this seems
+counter-intuitive to you, then don't worry, most newbies to CS will
+find this concept difficult to grasp. A recursive function calls
+itself with the express purpose of solving a simpler version of the
+same problem. The problem versions keep getting simpler until it
+reaches what is called the *base case* - a problem size so simple
+it's trivial to solve. The recursive function then uses the solutions
+to simpler versions of this problem to solve larger versions of the
+problem, eventually returning the answer to the original problem size.
+
+When designing a recursive function, you have to take into account
+
+1. What is the base case?
+2. Can we solve larger problem sizes using smaller problem sizes?
+3. From any problem size, are we able to recursively move towards the base case?
+
+In this question, we're tasked with finding the sum of the squares of the
+digits of a number. Do we have an answer for each of the three questions
+above?
+
+1. Yes, the base case is a number with only one digit. We can check this using the condition $$n < 10$$
+2. Yes. Say we have solved for $$SumOfDigitsSquare$$ for $$k - 1$$ digits (and have the answer to it), all we have to do is take that sum, and add it with the square of the $$k$$-th digit
+3. Yes. We can just call $$SumOfDigitsSquare$$ with the parameter $$\frac{n}{10}$$. $$n$$ is guaranteed to be non-negative, so we can always reach the base case from any value of $$n$$
+
+So, a complete pseudo-code would be as such: [^1]
+
+{% highlight c %}
+algorithm SumOfDigitsSquare(n):
+    if n < 10:
+        return n^2
+    return SumOfDigitsSquare(n / 10) + (n % 10)^2
+{% endhighlight %}
+
+&nbsp;
+
+We can actually express the above recursive formulation using a math expression:
+
+$$
+SumOfDigitsSquare(n) = F(n) =
+\begin{cases}
+    n^2, & \text{ if } x < 10 \\
+    (n \text{ mod } 10)^2 + F(\lfloor\frac{n}{10}\rfloor), & \text { otherwise}
+\end{cases}
+$$
+
+You don't need to know this though, but you may find it easier to
+understand depending on how math-inclined you are. Note that
+$$\lfloor n \rfloor$$ is the floor function, and $$n \text{ mod } 10$$
+means the "remainder when $$n$$ is divided by $$10$$". The
+mathematical definition of $$\text{mod}$$ and the C operator `%` is
+actually slightly different, but is inconsequential for the example
+above.
+
+## Question 3: Ordinal Suffix
+This question is pretty simple and is an introduction to using
+`if...else` statements. The algorithm is given in the question, so
+it's just a matter of implementation. The pseudo-code is given below:
+
+{% highlight c %}
+algorithm OrdinalSuffix(n):
+    if n is divisible by 11, 12 or 13:
+        print n + "th"
+    else if last digit of n is 1:
+        print n + "st"
+    else if last digit of n is 2:
+        print n + "nd"
+    else if last digit of n is 3:
+        print n + "rd"
+    else:
+        print n + "th"
+{% endhighlight %}
+
+The key idea here is to put the
+**strictest** condition at the beginning of the `if...else` chain,
+otherwise the less strict rules will pass the conditional first and
+the algorithm will be wrong.
+
+As an example, try moving the first `if` statement above to the last
+of the `if...else` chain. Trace the algorithm for an input `411`.
+What would be printed?
+
+## Question 4: Taxi
+This question, in particular, really wants you break down the problem
+into many smaller sub-problems. In fact, it even gives you *instructions*
+on how to solve the problem:
+
+> Break down this problem into multiple subproblems, each can be solved by a function. Write one function to answer each question below:
+
+Let's go through each instruction:
+
+> Given the day of the week, is it a weekday?
+
+
+The day of the week is given as an integer in the range $$[1...7]$$.
+Monday to Fridays are weekdays, so we just need to check if the integer
+is in the range $$[1...5]$$
+
+
+> Given the time of boarding, does it fall under the morning peak hour (6:00 - 9:29)?
+
+
+The hours and minutes are given as integers. Therefore, we can just
+check if hours are in the range $$[6...8]$$, then check if hours is
+equal to 9, and if the minutes are less than or equal to 29.
+
+> Given the time of boarding, does it fall under the evening peak hour (18:00 - 23:59)?
+
+
+We only really need to check if the hour is in the range $$[18...23]$$. Remember
+that in CS1010, there's no need for input validation.
+
+> Given the time of boarding, does it fall under the midnight peak hour (0:00 - 5:59)?
+
+
+The process is the same as the previous instruction.
+
+
+> Further break the calculation of fare down into two parts: the basic metered fare and the surcharge. Each of these can be its own function. Think about the four inputs to the taxi program. Which one is needed to compute the metered fare? Which ones are used to compute the surcharge? Pass in the appropriate arguments to the function that computes the metered fare and the function that computes the surcharge.
+
+Let's talk about the surcharge first. The surcharge only depends on
+whether the time falls within the peak hour, and some peak hours only
+apply on certain days. We've created all necessary functions to solve
+this task in the first four instructions.
+
+```c
+algorithm Surcharge(day, hours, min):
+    if is_midnight_peak_hour:
+        return 1.5
+    if is_evening_peak_hour:
+        return 1.25
+    if is_weekday && is_morning_peak_hour:
+        return 1.25
+    return 1.0
+```
+
+The base fare is a bit more messy. There's a bit of management needed
+with the distance to calculate the correct fare, so let's step through
+the logic we need.
+
+If the distance $$d$$ is less than or equal to 1000, the fare is just the
+base fare.
+
+$$fare_{base} = 3.20$$
+
+If the distance is between $$(1000, 10000]$$, then we only consider the
+distance after the first 1000km in the calculation of the additional
+fare.
+
+$$fare_{(1000,10000]} = fare_{base} + \left(\left\lceil\frac{(d - 1000)}{400}\right\rceil\right) \times 0.22$$
+
+In the "worst case", with a distance of 10000, the total fare
+is given by
+
+$$fare_{10000} = fare_{base} + \left(\left\lceil\frac{9000}{400}\right\rceil \times 0.22\right)$$
+
+If the distance is even greater than that, then the solution is to
+all consider the distance after 10000km, then just add the above distance
+to it.
+
+$$fare_{>10000} = fare_{10000} + \left(\left\lceil\frac{(d - 10000)}{350}\right\rceil\right) \times 0.22$$
+
+Just integrate these formulas into code, and you will be good to go.
+The total fare is then just $$fare \times surcharge$$.
+
+&nbsp;
+
+---
+
+[^1]: The style convention I use for algorithm pseudo-code follows that of many algorithm textbooks - UpperCamelCase for function names, one-indexed arrays are preferred over zero-indexed, and variable typing is generally left out. Do not follow this style when typing actual C code.
