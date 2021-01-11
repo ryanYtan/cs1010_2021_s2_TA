@@ -233,46 +233,65 @@ What would be printed?
 
 ## Question 4: Taxi
 This question, in particular, really wants you break down the problem
-into many smaller sub-problems. In fact, it even gives you *instructions*
-on how to solve the problem:
+into many smaller sub-problems. In fact, it even gives you
+*instructions* on how to solve the problem!
 
-> Break down this problem into multiple subproblems, each can be solved by a function. Write one function to answer each question below:
+### Prep Work
+
+> Break down this problem into multiple subproblems, each can be
+solved by a function. Write one function to answer each question
+below:
 
 Let's go through each instruction:
 
 > Given the day of the week, is it a weekday?
 
+The day of the week is given as an integer in the range [1...7].
+So, we just need to check if the integer is in the range [1...5].
 
-The day of the week is given as an integer in the range $$[1...7]$$.
-Monday to Fridays are weekdays, so we just need to check if the integer
-is in the range $$[1...5]$$
-
+```c
+function is_weekday(day):
+    return 1 <= day <= 5
+```
 
 > Given the time of boarding, does it fall under the morning peak hour (6:00 - 9:29)?
 
+The hours and minutes are given as integers. If the given hour is 6,
+7 or 8, then we don't need to check the minutes. Otherwise, check if
+the given hour is 9, and the minutes are in the range [0...29]. If
+none are true, then the given timing does not fall under morning peak
+hour.
 
-The hours and minutes are given as integers. Therefore, we can just
-check if hours are in the range $$[6...8]$$, then check if hours is
-equal to 9, and if the minutes are less than or equal to 29.
+```c
+function is_morning_peak_hour(hour, minutes):
+    return 6 <= hour <= 8 || (hour == 9 && minutes <= 29)
+```
 
 > Given the time of boarding, does it fall under the evening peak hour (18:00 - 23:59)?
 
+In this case, we only really need to check if the hour is in the
+range [18...23].
 
-We only really need to check if the hour is in the range $$[18...23]$$. Remember
-that in CS1010, there's no need for input validation.
+```c
+function is_evening_peak_hour(hour):
+    return 18 <= hour <= 23
+```
 
 > Given the time of boarding, does it fall under the midnight peak hour (0:00 - 5:59)?
 
+The function is pretty much the same as above.
 
-The process is the same as the previous instruction.
-
+### Finishing Up
 
 > Further break the calculation of fare down into two parts: the basic metered fare and the surcharge. Each of these can be its own function. Think about the four inputs to the taxi program. Which one is needed to compute the metered fare? Which ones are used to compute the surcharge? Pass in the appropriate arguments to the function that computes the metered fare and the function that computes the surcharge.
 
+#### Surcharge
+
 Let's talk about the surcharge first. The surcharge only depends on
 whether the time falls within the peak hour, and some peak hours only
-apply on certain days. We've created all necessary functions to solve
-this task in the first four instructions.
+apply on certain days, while others always apply. We've created all
+necessary functions to solve this task in the first four
+instructions, so all we need to do is to use them in this function:
 
 ```c
 algorithm Surcharge(day, hours, min):
@@ -285,31 +304,38 @@ algorithm Surcharge(day, hours, min):
     return 1.0
 ```
 
-The base fare is a bit more messy. There's a bit of management needed
-with the distance to calculate the correct fare, so let's step through
-the logic we need.
+#### Fare
 
-If the distance $$d$$ is less than or equal to 1000, the fare is just the
-base fare.
+The fare is only dependent on the distance, so the prototype of the
+fare-calculating function will be something along the lines of:
 
-$$fare_{base} = 3.20$$
+```c
+algorithm CalculateFare(dist):
+    :
+```
 
-If the distance is between $$(1000, 10000]$$, then we only consider the
-distance after the first 1000km in the calculation of the additional
-fare.
+For a travelled distance $$d$$,
 
-$$fare_{(1000,10000]} = fare_{base} + \left(\left\lceil\frac{(d - 1000)}{400}\right\rceil\right) \times 0.22$$
+If $$d \leq 1000$$, the fare is just the base fare.
+
+$$fare_{d \leq 1000} = fare_{base} = 3.20$$
+
+If the distance is in the range $$(1000, 10000]$$, then we only
+consider the distance after the first 1000km in the calculation of
+the additional fare.
+
+$$fare_{d = (1000,10000]} = fare_{base} + \left(\left\lceil\frac{(d - 1000)}{400}\right\rceil\right) \times 0.22$$
 
 In the "worst case", with a distance of 10000, the total fare
 is given by
 
-$$fare_{10000} = fare_{base} + \left(\left\lceil\frac{9000}{400}\right\rceil \times 0.22\right)$$
+$$fare_{d = 10000} = fare_{base} + \left(\left\lceil\frac{9000}{400}\right\rceil \times 0.22\right)$$
 
 If the distance is even greater than that, then the solution is to
 all consider the distance after 10000km, then just add the above distance
 to it.
 
-$$fare_{>10000} = fare_{10000} + \left(\left\lceil\frac{(d - 10000)}{350}\right\rceil\right) \times 0.22$$
+$$fare_{d > 10000} = fare_{d = 10000} + \left(\left\lceil\frac{(d - 10000)}{350}\right\rceil\right) \times 0.22$$
 
 Just integrate these formulas into code, and you will be good to go.
 The total fare is then just $$fare \times surcharge$$.
