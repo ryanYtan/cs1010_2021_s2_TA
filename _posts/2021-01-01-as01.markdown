@@ -17,7 +17,7 @@ hopefully you have thought about this in the process of solving each
 problem.
 
 ## Question 1: Box
-![box](/assets/images/box.jpg){:height="150px"}
+![box]({{ site.baseurl }}/assets/images/box.jpg){:height="150px"}
 
 In this question, our goal is to find the surface area and
 "diagonal" of a box (cuboid). Since this question in particular is
