@@ -4,11 +4,11 @@ title:  "Assignment 1"
 date:   2021-01-01 00:00:00 +0800
 ---
 
-Congratulations on completing your first assignment. As it's likely
-your first time writing code, and in C no less, that you've struggled
-with the many syntax errors thrown by the compiler. Over time, the
-difficulty will be less on C syntax and more on figuring out what
-code to write to solve the algorithm.
+Congratulations on completing your first assignment. As it is likely
+your first time writing code, and in C no less, you've no doubt
+struggled with the many syntax errors thrown by the compiler. Over time,
+the difficulty will be less on the C syntax and more on figuring out
+what code to write to solve problem.
 
 The main focus of Assignment 1 is on
 **breaking down problems into smaller sub-problems**. This skill
@@ -26,8 +26,8 @@ mainly about C data-typing, I have to give real code for this question.
 ### Surface Area
 For the surface area, the question asks you to define a new function
 called `area_of_rectangle`, then use this new function to calculate
-the surface area of the box. We can treat this function like a math
-function e.g $$A(l,w) = l \times w$$. The corresponding function in code
+the surface area of the box. We can treat this function like one from
+math i.e $$A(l,w) = l \times w$$. The corresponding function in code
 will look like this:
 
 ```c
@@ -183,9 +183,23 @@ algorithm SumOfDigitsSquare(n):
     return SumOfDigitsSquare(n / 10) + (n % 10)^2
 ```
 
-&nbsp;
+If you don't get it, try tracing the above algorithm for small values
+of $$n$$ e.g $$n < 10$$ and $$10 < n < 1000$$. The expression below may
+make it simpler to grasp what the recursive function is actually doing:
 
-We can actually express the above recursive formulation using a math expression:
+$$
+\begin{align*}
+F(1234) & = 4^2 + F(123) \\
+& = 4^2 + 3^2 + F(12) \\
+& = 4^2 + 3^2 + 2^2 + F(1) \\
+& = 4^2 + 3^2 + 2^2 + 1^2
+\end{align*}
+$$
+
+### Recurrence Relation
+
+We can actually express the above recursive formulation using a math expression
+(called a recurrence relation):
 
 $$
 SumOfDigitsSquare(n) = F(n) =
@@ -297,11 +311,12 @@ instructions, so all we need to do is to use them in this function:
 algorithm Surcharge(day, hours, min):
     if is_midnight_peak_hour:
         return 1.5
-    if is_evening_peak_hour:
+    else if is_evening_peak_hour:
         return 1.25
-    if is_weekday && is_morning_peak_hour:
+    else if is_weekday && is_morning_peak_hour:
         return 1.25
-    return 1.0
+    else:
+        return 1.0
 ```
 
 #### Fare
