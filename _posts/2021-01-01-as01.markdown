@@ -17,7 +17,7 @@ hopefully you have thought about this in the process of solving each
 problem.
 
 ## Question 1: Box
-![box](/assets/images/box.jpg){:height="150px"}
+![box]({{ site.baseurl }}/assets/images/box.jpg){:height="150px"}
 
 In this question, our goal is to find the surface area and
 "diagonal" of a box (cuboid). Since this question in particular is
@@ -67,7 +67,7 @@ given its base and height.
 The question wants you to modify the `hypotenuse_of` function shown
 in Unit 5 of the lecture. I've pasted it below:
 
-{% highlight c %}
+```c
 long square(long x)
 {
     return x * x;
@@ -77,7 +77,7 @@ double hypotenuse_of(long base, long height)
 {
     return sqrt(square(base) + square(height));
 }
-{% endhighlight %}
+```
 
 The hint given is to pay attention to the *type* of the parameters
 and return value. We will see why later.
@@ -88,13 +88,13 @@ width)`, and assigning the result to a `double` variable. Then, we call
 Simple enough. However, we then run into a problem. What happens when
 we use the following (seemingly correct) code?
 
-{% highlight c %}
+```c
 double diagonal(long length, long width, long height)
 {
     double floor_diagonal = hypotenuse_of(length, width);
     return hypotenuse_of(floor_diagonal, height);
 }
-{% endhighlight %}
+```
 
 You can try with a few inputs, but you will notice that it does not pass
 even the first test case, despite the logic being correct. The reason
@@ -112,7 +112,7 @@ parameters taken by `hypotenuse_of`. As a result, we also have to
 change the parameters and return value of `square`. A complete
 solution is shown below:
 
-{% highlight c %}
+```c
 double square(double x) // change return value and params
 {
     return x * x;
@@ -129,7 +129,7 @@ double diagonal(long length, long width, long height)
     double floor_diagonal = hypotenuse_of((double)length, (double)width);
     return hypotenuse_of(floor_diagonal, (double)height);
 }
-{% endhighlight %}
+```
 
 A better solution may be to change all the types of the parameters of
 `diagonal` to `double` to avoid type-casting.
@@ -176,12 +176,12 @@ above?
 
 So, a complete pseudo-code would be as such: [^1]
 
-{% highlight c %}
+```c
 algorithm SumOfDigitsSquare(n):
     if n < 10:
         return n^2
     return SumOfDigitsSquare(n / 10) + (n % 10)^2
-{% endhighlight %}
+```
 
 &nbsp;
 
@@ -208,7 +208,7 @@ This question is pretty simple and is an introduction to using
 `if...else` statements. The algorithm is given in the question, so
 it's just a matter of implementation. The pseudo-code is given below:
 
-{% highlight c %}
+```c
 algorithm OrdinalSuffix(n):
     if n is divisible by 11, 12 or 13:
         print n + "th"
@@ -220,7 +220,7 @@ algorithm OrdinalSuffix(n):
         print n + "rd"
     else:
         print n + "th"
-{% endhighlight %}
+```
 
 The key idea here is to put the
 **strictest** condition at the beginning of the `if...else` chain,
