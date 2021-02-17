@@ -4,12 +4,6 @@ title:  "Assignment 1"
 date:   2021-01-01 00:00:00 +0800
 ---
 
-Congratulations on completing your first assignment. As it is likely
-your first time writing code, and in C no less, you've no doubt
-struggled with the many syntax errors thrown by the compiler. Over time,
-the difficulty will be less on the C syntax and more on figuring out
-what code to write to solve problem.
-
 The main focus of Assignment 1 is on
 **breaking down problems into smaller sub-problems**. This skill
 will be necessary in every non-trivial programming problem, so
