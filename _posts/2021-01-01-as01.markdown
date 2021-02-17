@@ -224,7 +224,7 @@ it's just a matter of implementation. The pseudo-code is given below:
 
 ```c
 algorithm OrdinalSuffix(n):
-    if n is divisible by 11, 12 or 13:
+    if the last 2 digits of n is 11, 12 or 13:
         print n + "th"
     else if last digit of n is 1:
         print n + "st"
@@ -264,7 +264,7 @@ The day of the week is given as an integer in the range [1...7].
 So, we just need to check if the integer is in the range [1...5].
 
 ```c
-function is_weekday(day):
+function IsWeekday(day):
     return 1 <= day <= 5
 ```
 
@@ -277,7 +277,7 @@ none are true, then the given timing does not fall under morning peak
 hour.
 
 ```c
-function is_morning_peak_hour(hour, minutes):
+function IsMorningPeakHour(hour, minutes):
     return 6 <= hour <= 8 || (hour == 9 && minutes <= 29)
 ```
 
@@ -287,7 +287,7 @@ In this case, we only really need to check if the hour is in the
 range [18...23].
 
 ```c
-function is_evening_peak_hour(hour):
+function IsEveningPeakHour(hour):
     return 18 <= hour <= 23
 ```
 
@@ -309,11 +309,11 @@ instructions, so all we need to do is to use them in this function:
 
 ```c
 algorithm Surcharge(day, hours, min):
-    if is_midnight_peak_hour:
+    if IsMidnightPeakHour(hour):
         return 1.5
-    else if is_evening_peak_hour:
+    else if IsEveningPeakHour(hour):
         return 1.25
-    else if is_weekday && is_morning_peak_hour:
+    else if IsWeekday(day) && IsMorningPeakHour(hour, minutes):
         return 1.25
     else:
         return 1.0
