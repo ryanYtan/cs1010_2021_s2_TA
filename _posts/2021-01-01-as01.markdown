@@ -198,7 +198,7 @@ We can actually express the above recursive formulation using a math expression
 $$
 SumOfDigitsSquare(n) = F(n) =
 \begin{cases}
-    n^2, & \text{ if } x < 10 \\
+    n^2, & \text{ if } n < 10 \\
     (n \text{ mod } 10)^2 + F(\lfloor\frac{n}{10}\rfloor), & \text { otherwise}
 \end{cases}
 $$
