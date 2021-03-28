@@ -8,6 +8,10 @@ The following are some practice questions on Pointers and Arrays. Some
 are pretty contrived, but should be helpful in understanding how they work
 and their syntax in a C program.
 
+Some of these questions may require you to use `realloc`, you can read
+a primer of it [here]({{site.baseurl}}{% post_url 2021-03-28-realloc %}), by Googling or reading its man-page i.e running
+`man realloc` in your terminal.
+
 
 ### **ReadLongArray**
 Complete the C program below to read $$n$$ number of `long` integers
