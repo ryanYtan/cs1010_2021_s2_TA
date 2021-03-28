@@ -193,7 +193,7 @@ that all primes after $$2$$ and $$3$$ are of the form $$6k-1$$ and
 $$6k+1$$ for some $$k$$.
 
 The unoptimised algorithm runs in $$O(n)$$, but the math-optimised
-version runs in $$O(\sqrt{n})$$ time[^2].
+version runs in $$O(\sqrt{n})$$ time.
 
 ### Multiplication is Expensive
 If you had used $$i \times i \leq n$$ in your `for`-loop condition,
@@ -362,4 +362,3 @@ algorithm draw_triangle(n, h):
 ---
 
 [^1]: Think about why this is so.
-[^2]: More accurately, the algorithm actually runs in exponential time, since the number of bits required to represent the input is logarithmic in $$n$$. Say $$k$$ is the number of bits required to store $$n$$. Then $$k = \log_2{n}$$. $$k$$ bits can store $$2^k$$ possible values. Therefore, to check if a $$n$$ is prime, in the worst case, we need to check $$O(\sqrt{2^k}) = O(2^{\frac{k}{2}})$$ possible values.

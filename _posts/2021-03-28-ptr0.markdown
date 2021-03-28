@@ -8,7 +8,7 @@ This article has some code examples on arrays and 2-D arrays
 
 ### Stack-Allocated Array using `[]`
 A stack-allocated array is any array that is not allocated using `malloc`
-or `calloc`. Such arrays are efficient and need not be freed, however,
+or `calloc`. Such arrays are efficient and need not be freed. However,
 since they are allocated on the stack instead of the heap, their size is
 limited and must be constant (i.e known at compile time).
 
