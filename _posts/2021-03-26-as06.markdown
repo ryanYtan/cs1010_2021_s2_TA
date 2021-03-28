@@ -1,0 +1,149 @@
+---
+layout: post
+title:  "Assignment 6"
+date:   2021-03-26 16:00:00 +0800
+categories: jekyll update
+---
+
+## Question 1: Add
+I won't go into this question too in-depth since the algorithm is quite
+simple. The question tasks you to implement an addition on numerical
+strings. The most basic algorithm (and the only one I can think of,
+really) is the one you learnt in Primary School, shown below:
+
+```
+ 1           1 1 1
+  1 2 3         9 9 9
++ 4 9 1     +       1
+_______     _________
+  6 1 4       1 0 0 0
+```
+
+The goal is to implement this algorithm in C. While it's simple to
+understand, the real difficulty lies in the management of pointers
+and memory. The following is the high-level view of my algorithm:
+
+{% highlight c %}
+algorithm StringAdd(s1[1...n], s2[1...m]):
+    initialise result[1...Max(n, m) + 1]
+
+    AddTwoStrings(s1, s2, result)   // do addition algorithm
+    AddRemaining(s1, result)        // add remaining digits (with carry)
+    AddRemaining(s2, result)        // add remaining digits (with carry)
+
+    if there is a carry:
+        append '1' to result
+
+    return result
+{% endhighlight %}
+
+Let the length of the two strings be $$m$$ and $$n$$. Then the time
+complexity of this addition algorithm is $$O(\max(m,n))$$
+
+## Question 2: Frequency
+This question tests your knowledge of worst-case complexity analysis
+more than anything. For this, you are required to figure out whether
+two strings $$s1$$ and $$s2$$ are *permutations* of each other.
+
+Note that if the two strings are not of equal length, they cannot
+be permutations of each other. Since both strings are of equal length,
+let the length of either string be $$n$$.
+
+The simplest solution is to do a
+[sort on the two strings](https://en.wikipedia.org/wiki/Lexicographic_order),
+which can be done in $$O(n \log{n})$$ using your favourite sorting
+algorithm. Then do an $$O(n)$$ equality comparison. This is obviously
+not fast enough for the question.
+
+To come up with the algorithm, it's crucial to recognise that the set
+of characters is limited to the lowercase English alphabet, meaning
+that any iteration over this alphabet will run in $$O(1)$$ time. Remember
+that if any operation is not dependent on the size of the input, it runs
+in $$O(1)$$ time[^1]. Therefore, a possible solution is to use a
+counter to count how many of each character appears inside each
+string, then compare the two counters together.
+
+The first step is to count the number of times each character appears
+in each string. This can be done similarly to $$CountingSort$$, except
+this time, the counter array is limited to the size of the lowercase
+English alphabet. Each alphabet can be mapped to the range
+$$[0...25]$$, indexed by an array. An example is given below:
+
+```
+[ 1    2    5   ...]
+ 'a'  'b'  'c'  ...
+```
+In this case, the string contains a single `'a'`, two `'b'` and five
+`'c'`. We can build this array for each string in $$O(n)$$ time, and
+will hereafter be referred to as a *frequency array*.
+
+Then, we can simply check both whether both frequency arrays are the same. This
+operation runs in $$O(1)$$ time, as the number of elements in the
+frequency array does not grow with $$n$$. Therefore, the time
+complexity of the overall algorithm improves to $$O(n)$$.
+
+## Question 3: Permutation
+This is a more difficult version of the previous question. Instead of
+checking of a string $$s_1$$ is a permutation of $$s_2$$, now we need to check
+if $$s_1$$ is a permutation of *some substring of* of $$s_2$$. $$s_1$$ has length
+$$k$$ and $$s_2$$ has length $$n$$, the question guarantees that $$k \leq n$$.
+
+Checking for permutation of two equal-length strings is basically the
+algorithm from Question 2. Therefore, we can re-use it here.
+
+The simplest algorithm is to simply try all $$k$$-length substrings from
+$$s_2$$. We build a frequency array for $$s_1$$ in $$O(k)$$ time, then
+re-build the frequency array from every $$k$$-length substring of $$s_2$$, then
+do an $$O(1)$$ equality comparison. Since there are $$O(n)$$ number
+of $$k$$-length substrings in $$s_2$$, the algorithm runs in $$O(nk)$$ time.
+
+{% highlight c %}
+algorithm PermutationNaive( s1[1...k], s2[1...n] ):
+    freq_s1 = BuildFrequencyArray( s1[1...k] ) // O(k)
+
+    for i in range [1...n-k]: // O(n)
+        freq_s2 = BuildFrequencyArray( s2[i...i+k] ) // O(k)
+        if freq_s1 == freq_s2:
+            return TRUE
+
+    return FALSE
+{% endhighlight %}
+
+A small modification to the above algorithm can make it $$O(n + k)$$.
+Instead of rebuilding the frequency array for every substring, we can
+imagine a "sliding window" of size $$k$$ going over the string $$s_2$$.
+The sliding window determines which substring of $$s_2$$ we are looking
+at currently. If the substring covered by the window is not equal to
+the frequency array for $$s_1$$, we can begin to move it to the right.
+
+Before we move the sliding window, remove the leftmost
+element covered by the window from the frequency array of $$s_2$$. Then,
+we move the sliding window to the right by one index, then add the
+rightmost element to the frequency array. Such an operation runs in
+$$O(1)$$ time.
+
+{% highlight c %}
+algorithm Permutation( s1[1...k], s2[1...n] ):
+    freq_s1 = BuildFrequencyArray( s1[1...k] ) // O(k)
+    freq_s2 = BuildFrequencyArray( s2[1...k] ) // O(k)
+
+    i = 0
+    j = k
+    while j <= n: // O(n)
+        // O(1)
+        if freq_s1 == freq_s2:
+            return TRUE
+
+        // O(1)
+        freq_s2[s2[i]] -= 1
+        i += 1
+        j += 1
+        freq_s2[s2[j]] += 1
+
+    return FALSE
+{% endhighlight %}
+
+Since each iteration of the main loop runs in $$O(1)$$ time, the
+entire algorithm ends up running in $$O(n + k)$$ time.
+
+[^1]: This is why any chess algorithm is technically $$O(1)$$ when played on a standard 8x8 chess board.

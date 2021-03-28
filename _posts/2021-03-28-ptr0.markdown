@@ -1,0 +1,163 @@
+---
+layout: post
+title:  "Pointers Examples"
+date:   2021-03-28 00:00:02 +0800
+---
+
+This article has some code examples on arrays and 2-D arrays
+
+### Stack-Allocated Array using `[]`
+A stack-allocated array is any array that is not allocated using `malloc`
+or `calloc`. Such arrays are efficient and need not be freed, however,
+since they are allocated on the stack instead of the heap, their size is
+limited and must be constant (i.e known at compile time).
+
+We can figure out the length of the array by using `sizeof(arr) / sizeof(arr[0])`.
+However, this **only** works in the same scope as when the array is declared, i.e
+if the array is passed to another function, the array "decays" into a pointer
+and the above will not work, so use it sparingly.
+
+```c
+#include "cs1010.h"
+
+int main()
+{
+    long arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    long n = sizeof(arr) / sizeof(arr[0]);
+
+    for (long i = 0; i < n; i += 1) {
+        cs1010_println_long(arr[i]);
+    }
+
+    // don't need to free
+}
+```
+
+The following is a possible use case:
+
+```c
+#include "cs1010.h"
+#include <stdbool.h>
+
+bool is_disallowed(char c, char disallowed[], long disallowed_len)
+{
+    for (long i = 0; i < disallowed_len; i += 1) {
+        if (c == disallowed[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main()
+{
+    char disallowed[] = {'"', ',', ';', ':', '_'};
+    long disallowed_len = sizeof(disallowed) / sizeof(disallowed[0]);
+    char *s = cs1010_read_word();
+    for (long i = 0; s[i] != '\0'; i += 1) {
+        if (is_disallowed(s[i], disallowed, disallowed_len)) {
+            s[i] = ' ';
+        }
+    }
+    cs1010_println_string(s);
+}
+```
+
+### 1-D Array using `calloc`
+```c
+#include "cs1010.h"
+
+int main()
+{
+    long n = cs1010_read_long();
+    long *arr = calloc(n, sizeof(long)); // initialise n number of long
+
+    for (long i = 0; i < n; i += 1) {
+        arr[i] = i;
+    }
+
+    for (long i = 0; i < n; i += 1) {
+        cs1010_println_long(arr[i]);
+    }
+
+    free(arr);
+}
+```
+
+### 1-D Array using `cs1010_read_long_array`
+```c
+#include "cs1010.h"
+
+int main()
+{
+    long n = cs1010_read_long();
+    long *arr = cs1010_read_long_array(n);
+
+    for (long i = 0; i < n; i += 1) {
+        cs1010_println_long(arr[i]);
+    }
+
+    free(arr);
+}
+```
+
+### 2-D Array using `calloc`
+```c
+#include "cs1010.h"
+
+int main()
+{
+    long rows = cs1010_read_long();
+    long cols = cs1010_read_long();
+
+    long **arr = calloc(rows, sizeof(long*));
+    for (long i = 0; i < rows; i += 1) {
+        arr[i] = calloc(cols, sizeof(long));
+    }
+
+    for (long i = 0; i < rows; i += 1) {
+        for (long j = 0; j < cols; j += 1) {
+            arr[i][j] = i + j;
+        }
+    }
+
+    for (long i = 0; i < rows; i += 1) {
+        for (long j = 0; j < cols; j += 1) {
+            cs1010_print_long(arr[i][j]);
+            cs1010_print_string(" ");
+        }
+        cs1010_println_string("");
+    }
+
+    // make sure to free each row before freeing the main ptr
+    for (long i = 0; i < rows; i += 1) {
+        free(arr[i]);
+    }
+    free(arr);
+}
+```
+
+### 2-D Array using `cs1010_read_long_array`
+
+```c
+#include "cs1010.h"
+
+int main()
+{
+    long rows = cs1010_read_long();
+    long cols = cs1010_read_long();
+
+    long **arr = calloc(rows, sizeof(long*));
+    for (long i = 0; i < rows; i += 1) {
+        arr[i] = cs1010_read_long_array(cols);
+    }
+
+    // do whatever with arr
+
+    // make sure to free each row before freeing the main ptr
+    for (long i = 0; i < rows; i += 1) {
+        free(arr[i]);
+    }
+    free(arr);
+}
+```

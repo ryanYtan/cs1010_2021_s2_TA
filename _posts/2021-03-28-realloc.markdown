@@ -1,0 +1,59 @@
+---
+layout: post
+title:  "Primer on realloc"
+date:   2021-03-28 00:00:00 +0800
+---
+
+Declared in the header `stdlib.h`, the function `realloc` resizes a block of
+memory allocated by `malloc` and `calloc`, to a given size in bytes, and
+returns a pointer to the resized block, or `NULL` if the resizing fails.
+
+```c
+void *realloc(void *ptr, size_t num_bytes);
+```
+
+An example of its (proper) use is shown below:
+```c
+char *s = calloc(100, sizeof(char));
+char *tmp = realloc(s, 50 * sizeof(char)); // resize from 100 bytes to 50 bytes
+if (tmp == NULL) {
+    cs1010_println_string("realloc failed");
+    exit(1); // exit program
+}
+s = tmp; // assign tmp to s since tmp != NULL
+```
+
+A possible full use is shown below:
+```c
+/**
+ * Returns a new array containing the elements of arr that are not
+ * zeroes.
+
+ * @param[in] arr original array
+ * @param[in] len number of elements of arr
+ * @param[out] final_len number of elements of the new returned list
+ * @return a pointer to a new list, or NULL if a new list could not be allocated
+ */
+long *clear_of_zeroes(const long arr[], long len, long *final_len)
+{
+    long *no_zeroes = calloc(len, sizeof(long));
+    long k = 0;
+    for (long i = 0; i < len; i += 1) {
+        if (arr[i] != 0) {
+            no_zeroes[k] = arr[i];
+            k += 1;
+        }
+    }
+    long *tmp = realloc(no_zeroes, k * sizeof(long));
+    if (tmp == NULL) {
+        cs1010_println_string("realloc failed");
+        return NULL;
+    }
+    *final_len = k;
+    return tmp;
+}
+```
+
+Some caveats to note
+* Remember to always multiply the size of the data type in the `num_bytes` argument, otherwise you will end up with some mysterious bugs!
+* The reason why we assign the return value of `realloc` to a separate pointer is that otherwise, if `realloc` fails, then `NULL` is assigned to the original pointer. The original memory allocated is not freed and would therefore lead to a memory leak

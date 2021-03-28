@@ -1,0 +1,129 @@
+---
+layout: post
+title:  "Assignment 5"
+date:   2021-03-19 16:00:00 +0800
+categories: jekyll update
+---
+
+Before I get into the questions, let's go over some pre-knowledge first.
+
+## 2-D Jagged Matrix
+The 2-D Jagged Matrix is somewhat of an oddity, I don't think I've
+ever used it outside of CS1010. That said, it's somewhat handy for
+dealing with space constraints especially for larger values of $$n$$.
+
+The matrix given in the first two questions - Contact and Social,
+represent the "social network" between $$n$$ people. More specifically,
+if $$M[i][j] = 1$$, then a connection exists between persons $$i$$ and
+$$j$$. Otherwise, no connection exists. Therefore, you can only really
+do two things with the matrix given to you:
+
+1. Check if a person $$i$$ has a connection with $$j$$
+2. Enumerate all persons that a particular person has been connected to
+
+Despite the simplicity of these two operations, they are quite
+powerful, as will be seen in the Contact and Social.
+
+### Managing Indexing
+The matrix being jagged makes indexing a big pain. Accessing
+$$M[i][j]$$ for $$i \neq j$$ only works if $$i > j$$, otherwise, the
+index technically does not exist, and (hopefully) your program
+will throw a `segfault`. Therefore, it's necessary to create a
+function that handles the indexing for us.
+
+```c
+algorithm IsConnected(M, i, j):
+    if i > j:
+        return M[i][j] == 1
+    return M[j][i] == 1
+```
+
+With this, we don't need to care about whether $$i > j$$. From here
+on, any array access of 2-D jagged matrix in the style of $$M[i][j]$$
+implies the use of some function similar to above.
+
+## Question 1: Contact
+We're given the matrix $$M$$ and two persons $$i$$ and $$j$$. Our goal is
+to check if $$i$$ and $$j$$ are directly connected or connected by a
+common person i.e is there a middle-man $$k$$ for which both $$i$$ and
+$$j$$ are connected to?
+
+The former is simple, $$M[i][j]$$ immediately tells us if $$i$$ and
+$$j$$ are directly connected.
+
+For the latter, we can simply enumerate all connections of both $$i$$
+and $$j$$, and find out if there's a person that both are connected
+to. Otherwise, we consider $$i$$ and $$j$$ not connected.
+
+```c
+algorithm HasCommonFriend(M, i, j):
+    for k in range [1...n]:
+        if IsConnected(i, k) and IsConnected(k, j):
+            return k
+    return -1
+```
+
+After this, it's just a matter of calling `IsConnected` and `HasCommonFriend`
+and printing the correct value to the standard output.
+
+## Question 2: Social
+In this question, I define $$D_h$$ to be a degree $$h$$ network, which can be
+accessed as $$D_h[i][j]$$ similarly to $$M$$ above.
+
+Given the degree 1 network $$D_1$$ as input, and an integer $$k$$, the question asks to find a
+social network of degree $$k$$, where $$D_k[i][j] = 1$$ if $$i$$ and $$j$$ are
+at most $$k$$ "hops" away from each other in $$D_1$$.
+
+Let's try a simpler problem. Instead of $$k$$, let's try to find a network
+of degree 2 i.e we are trying to find the matrix $$D_2$$. Well, we actually
+already have the tools we need from Question 1. Since we can find out if there
+is a common neighbour between any two persons, this already counts as 2-hops
+away! We can simply apply this algorithm to all possible pairs of persons to
+get $$D_2$$. If any $$i$$ and $$j$$ have any common neighbours, then mark
+$$D_2[i][j] = 1$$.
+
+What about a degree of 3? Note that from the above, we've managed to find
+$$D_2$$ - it turns out that we can use $$D_2$$ to solve for $$D_3$$ (along with $$D_1$$).
+Any $$D_3[i][j]$$ is marked when there exists a common neighbour between $$i$$
+and $$j$$ that is 2 hops away from $$i$$ and 1 hop away from $$j$$ (or vice versa).
+
+For a degree 4, $$D_4[i][j]$$ is marked when there exists a common neighbour between
+$$i$$ and $$j$$ that is 3 hops away from $$i$$ and 1 hop away from $$j$$ (or vice versa).
+
+In general, $$D_h[i][j]$$ is marked if there exists some common neighbour
+between $$i$$ and $$j$$ that is $$h-1$$ hops away from $$i$$, and 1 hop away
+from $$j$$ (or vice versa). We compute $$D_h$$ using $$D_{h-1}$$ and $$D_1$$,
+and iterate from degree $$h = 2$$ up until $$h = k$$, after which we will
+have $$D_k$$.
+
+We modify `HasCommonFriend` in the previous question to use $$D_{h-1}$$ and $$D_1$$:
+
+```c
+algorithm HasCommonFriend(Dhm1, D1, i, j):
+    for k in range[1...n]:
+        if IsConnected(D1, i, k) and IsConnected(Dhm1, k, j):
+            return 1
+    return 0
+```
+
+Now, for any $$D_h$$:
+
+```c
+algorithm ComputeDegreeH(Dhm1, D1, Dh):
+    for each pair (i,j):
+        if IsConnected(D1, i, j) == 1:
+            Dh[i][j] = 1
+        else
+            Dh[i][j] = HasCommonFriend(DHm1, D1, i, j)
+```
+
+Then, we just have to call `ComputeDegreeH` $$k - 1$$ times in order to
+compute $$D_k$$.
+
+
+## Question 3: Life
+This question is significantly easier to solve than Social. The only
+"gotcha" moment is that you **have** to copy the "world" to another
+2-D array and update it, otherwise your algorithm is going to have
+problems during the updating process while you count the number of
+`ALIVE` and `DEAD` cells.

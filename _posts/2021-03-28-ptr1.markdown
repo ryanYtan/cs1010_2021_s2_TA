@@ -1,0 +1,342 @@
+---
+layout: post
+title:  "Pointers Practice Questions"
+date:   2021-03-28 00:00:02 +0800
+---
+
+The following are some practice questions on Pointers and Arrays. Some
+are pretty contrived, but should be helpful in understanding how they work
+and their syntax in a C program.
+
+
+### **ReadLongArray**
+Complete the C program below to read $$n$$ number of `long` integers
+from the standard input into an array, then printing the array to
+the standard output.
+
+```c
+#include "cs1010.h"
+
+void add_num_to_array(long *arr, long index, long element) // TODO
+{
+    // TODO
+}
+
+int main()
+{
+    long n = cs1010_read_long();
+    long *arr = ________; // TODO
+    for (long i = 0; i < n; i += 1) {
+        add_num_to_array(___, ___, ___); // TODO
+    }
+
+    for (long i = 0; i < n; i += 1) {
+        cs1010_print_long(___); // TODO
+        cs1010_print_string(" ");
+    }
+    cs1010_println_string("");
+}
+```
+
+```
+$ ./readlongarray
+10
+1 2 3 4 5 6 7 8 9 10
+1 2 3 4 5 6 7 8 9 10
+
+$ ./readlongarray
+5
+2 3 1 4 5
+2 3 1 4 5
+```
+
+### **Swap**
+Complete the program below to swap two `long` values using pointers.
+```c
+#include "cs1010.h"
+
+void swap(long *x, long *y)
+{
+    // TODO
+}
+
+int main()
+{
+    long x = 10;
+    long y = 20;
+    swap(__, __); // TODO
+    cs1010_println_long(x); // print 20
+    cs1010_println_long(y); // print 10
+}
+```
+
+### **Reverse**
+Complete the program below to reverse a string. Note that you are not
+allowed to access characters in the strings `start` or `end` via indices e.g `start[i]` or `end[i]`.
+
+You may find the function `swap` in previous question useful.
+```c
+#include "cs1010.h"
+#include <string.h>
+
+void reverse(char *start, char *end)
+{
+    :
+}
+
+int main()
+{
+    char *start = cs1010_read_word(); // e.g "abcde"
+    size_t len = strlen(s);
+    char *end = start + len - 1;
+    reverse(start, end);
+    cs1010_println_string(start); // prints "edcba"
+}
+```
+
+```
+$ ./reverse
+abcde
+edcba
+
+$ ./reverse
+a
+a
+```
+
+### **Reduce**
+Write a program `reduce` that
+* Reads, from the standard input, a string $$s$$ that can contain
+  * Lowercase English letters [`a-z`]
+  * Uppercase English letters [`A-Z`]
+  * Whitespace
+  * Punctuation from the following set: [`!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `-` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `_` `{` `|` `}` `~`]
+* Outputs, to the standard output, the modified string $$t$$ containing
+  * All lowercase letters from $$s$$
+  * All uppercase letters from $$s$$ changed to lowercase letters
+  * All punctuation from $$s$$ replaced with whitespace
+
+You may find the following expressions helpful
+* `'a' <= c && c <= 'z'` - checks whether a character `c` is a lowercase character
+* `'A' <= c && c <= 'Z'` - checks whether a character `c` is an uppercase character
+* `c + ('a' - 'A')` - if `c` is an uppercase character, convert it to lowercase
+
+You may also find the function `char *cs1010_read_line()` useful.
+
+```
+$ ./reduce
+The Quick Brown Fox Jumped Over The Lazy Dog
+the quick brown fox jumped over the lazy dog
+
+$ ./reduce
+I am Gandalf the White. And I come back to you now... at the turn of the tide.
+i am gandalf the white  and i come back to you now    at the turn of the tide
+
+$ ./reduce
+',':;_ ''';:: __a__ '",.__a_;"
+                a         a
+```
+
+### **Tokenise**
+This is a continuation of the above question.
+
+Write a program `tokenise` that
+* Reads, from the standard input, a string $$s$$ that can contain
+  * Lowercase English letters [`a-z`]
+  * Uppercase English letters [`A-Z`]
+  * Whitespace
+  * Punctuation from the following set: [`!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `-` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `_` `{` `|` `}` `~`]
+* Outputs, to the standard output, each word that appears in the reduced input, each on a separate line
+
+It is guaranteed that the length of each word in the input before tokenisation is at most 32 characters long.
+
+```
+$ ./lowercase
+ThE QuIcK BrOwN fOx
+the
+quick
+brown
+fox
+
+$ ./lowercase
+I am Gandalf the White. And I come back to you now...
+i
+am
+gandalf
+the
+white
+and
+i
+come
+back
+to
+you
+now
+
+$ ./lowercase
+',':;_ ''';:: __a__ '",.__a_;"
+a
+a
+```
+
+
+### **Theatre**
+A certain theatre in Singapore has a theatre with $$m$$ rows, where each
+row has $$n$$ seats. Everyday, customers make bookings in a very inefficient
+system where all they have to do is specify the row number and column number - a
+pair of numbers in the range $$([0,m-1],[0,n-1])$$, to make a booking.
+
+The system does not check for conflicts between bookings, so you've been
+enlisted to help check for such cases in the system.
+
+Write a program `theatre` that
+* Reads, from the standard input
+  * Two integers $$m$$ and $$n$$ that correspond to the number of rows and columns of seats in the cinema
+  * An integer $$k$$ which corresponds to the number of bookings made by customers
+  * $$k$$ number of integer pairs $$(i,j)$$ that correspond to the row number and column number of each booking
+
+* Outputs, to the standard output, the string `YES` if there exists a conflict between any two bookings, and `NO` otherwise.
+
+```
+$ ./theatre
+4 4
+5
+1 0
+0 1
+2 3
+4 1
+3 4
+NO
+
+$ ./theatre
+3 2
+3
+0 1
+0 0
+0 1
+YES
+```
+
+
+### **Transpose**
+The _transpose_ of a matrix $$A$$ is the new matrix $$A^T$$ mirrored about
+its main diagonal. The main diagonal is the diagonal of elements formed by
+starting from the top-left element of the matrix and moving diagonally right-and-down.
+
+A few examples are shown below:
+
+$$
+\begin{bmatrix}
+a & b & c \\
+d & e & f
+\end{bmatrix}^T
+=
+\begin{bmatrix}
+a & d \\
+b & e \\
+c & f
+\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}
+a & b & c \\
+d & e & f \\
+g & h & i
+\end{bmatrix}^T
+=
+\begin{bmatrix}
+a & d & g \\
+b & e & h \\
+c & f & i
+\end{bmatrix}
+$$
+
+Write a program `transpose` that
+* Reads, from the standard input, two integers $$m$$ and $$n$$ that correspond
+to the number of rows and number of columns of the matrix respectively, followed by
+$$m \times n$$ number of integers, representing the elements of the matrix.
+* Outputs, to the standard output, the transposed matrix
+
+```
+$ ./transpose
+1 1
+100
+100
+
+$ ./transpose
+2 3
+1 2 3
+4 5 6
+1 4
+2 5
+3 6
+
+$ ./transpose
+3 3
+7 77 777
+8 88 888
+9 99 999
+7 8 9
+77 88 99
+777 888 999
+```
+
+
+### **Adjacency List**
+In question 2 (Social) of Assignment 5, you built a "friend network" using a jagged
+2-D array. We call such a data structure an _adjacency matrix_. In this question,
+we will be a building another data structure, called an _adjacency list_, that can be used to represent
+such a friend network.
+
+Say there are $$n$$ people in a given friend network. For simplicity, let's
+label each of the $$n$$ people with integers in the range $$[0, n-1]$$. In
+an adjacency list, each person $$i$$ has a _**sorted list**_ of persons for which $$i$$
+is friends with.
+
+For example, say we're given a network of 3 people. We have that the person
+`0` is friends with persons `2` and `1`. Then, their list will look like
+```
+0 -> 1, 2
+```
+Extending this to the rest of the network, the adjacency list will look like
+```
+0 -> 1, 2  // 0 is friends with 1 and 2
+1 -> 0     // 1 is friends with 0
+2 -> 0     // 2 is friends with 0
+```
+
+Write a program `adjlist` that
+* Reads, from the standard input
+  * An integer $$n$$ that is the number of people in the friend network
+  * An integer $$k$$ representing the number of links between any two pairs of people in the network
+  * $$k$$ number of integer pairs $$(i,j)$$, each representing a link between any two pairs of people in the network
+* Outputs, to the standard output, the adjacency list representing the friend network
+
+```
+$ ./adjlist
+3 2
+0 1
+1 2
+0 -> 1
+1 -> 0 2
+2 -> 1
+
+$ ./adjlist
+4 4
+0 1
+1 2
+2 3
+3 0
+0 -> 1 3
+1 -> 0 2
+2 -> 1 3
+3 -> 0 2
+
+$ ./adjlist
+3 1
+0 1
+0 -> 1
+1 -> 0
+2 ->
+```

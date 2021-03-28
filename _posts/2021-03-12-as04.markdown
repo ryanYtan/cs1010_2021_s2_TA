@@ -1,0 +1,119 @@
+---
+layout: post
+title:  "Assignment 4"
+date:   2021-03-12 16:00:00 +0800
+categories: jekyll update
+---
+
+Assignment 4 only has two questions (hurrah!).
+
+## Question 1: Selection Sort
+$$SelectionSort$$ is a well-known sorting algorithm so I won't go into
+too much depth. It's a one of the common quadratic sorting algorithms
+along with $$InsertionSort$$ and $$BubbleSort$$.
+
+The key idea is to find the maximum of $$n$$ elements of the input array
+$$A$$, then swap the maximum with the $$n$$-th element of $$A$$. This
+is one pass of $$SelectionSort$$, now the $$n$$-th element is in the
+correct place. We now repeat the previous step with the first $$n - 1$$
+elements of $$A$$, then $$n - 2$$, etc until we are left with one
+element, which must be in the correct position. The array will then be
+sorted.
+
+The basic pseudo-code is
+
+{% highlight c %}
+algorithm SelectionSort(A[1...n]):
+    for i in range [n...1]:
+        max = FindMax(A[1...i])
+        swap max with element at index i
+{% endhighlight %}
+
+## Question 2: Mastermind
+This is a pretty interesting question that uses an old board game as
+its premise. The jist of it is the *coder* starts with a 4-color code
+(represented as characters), while the *code-breaker* must guess the
+4-color code. After the *code-breaker* makes a guess, the *coder*
+tells the *code-breaker* two numbers:
+
+1. The number of colors that are in the same position and are the same color as the code and guess
+2. The number of colors that are the same colors as the code and guess
+
+You are not allowed to double-count, so if a color in the guess is in
+the same position and same color as the code and thus is counted in the
+first number, then this color should not be counted in the second
+number. From intuition, you can probably guess that you should
+count the first number before the second. The game is played a total
+of 8 times before terminating, or less if the *code-breaker* guesses
+the correct code.
+
+Let's try and write a simple algorithm for this:
+
+{% highlight c %}
+algorithm CountSameColorPosition(Code[1...4], Guess[1...4]):
+    count = 0
+    for i in range [1...4]:
+        if Code[i] == Guess[i]:
+            count += 1
+    return count
+
+algorithm CountSameColor(Code[1...4], Guess[1...4]):
+    count = 0
+    for i in range [1...4]:
+        for j in range [1...4]:
+            if Code[i] == Guess[j]:
+                count += 1
+    return count
+{% endhighlight %}
+
+You can probably tell right away that the two functions will definitely
+at least double-count. For example, if $$Code[1] = Guess[1]$$, both
+algorithms will include it in their count. We need to find some way
+to *mark* the positions of each array if they are already considered
+towards either of the two counts.
+
+A possible solution is to use two boolean arrays $$CodeMarked[1...4]$$
+and $$GuessMarked[1...4]$$, both initialised to all $$FALSE$$. When
+either functions find a match between the code and the guess in their
+respective algorithms, they set the corresponding indices in
+$$CodeMarked$$ and $$GuessMarked$$ to $$TRUE$$.
+
+With that said, we can now improve the algorithm:
+
+{% highlight c %}
+algorithm CountSameColorPosition(Code[1...4], Guess[1...4],
+                                 CodeMarked[1...4], GuessMarked[1...4]):
+    count = 0
+    for i in range [1...4]:
+
+        // actually don't need, because we always call this function first
+        if CodeMarked[i] is marked or GuessMarked[i] is marked:
+            continue
+
+        if Code[i] == Guess[i]:
+            CodeMarked[i] = TRUE
+            GuessMarked[j] = TRUE
+            count += 1
+    return count
+
+algorithm CountSameColor(Code[1...4], Guess[1...4],
+                         CodeMarked[1...4], GuessMarked[1...4]):
+    count = 0
+    for i in range [1...4]:
+        if CodeMarked[i] is marked:
+            continue
+        for j in range [1...4]:
+            if CodeGuess[j] is marked:
+                continue
+            if Code[i] == Guess[j]:
+                count += 1
+    return count
+{% endhighlight %}
+
+A side-note on the use of `continue` - while it's discouraged in CS1010,
+this is one of the few places where I think any other method will cause
+a hit to readability. Therefore, I use it liberally in this question.
+
+Anyhow, These two algorithms should only be called once each for each
+of 8 rounds of the entire game. $$CodeMarked$$ and $$GuessMarked$$
+should be reset for each round as well.

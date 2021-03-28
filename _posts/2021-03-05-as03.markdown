@@ -1,0 +1,173 @@
+---
+layout: post
+title:  "Assignment 3"
+date:   2021-03-05 16:00:00 +0800
+categories: jekyll update
+---
+
+Assignment 3 introduces arrays. Arrays are just elements stored in
+contiguous memory, and are **zero-indexed** i.e the first element is
+at `a[0]` rather than `a[1]`. Arrays are the *only* data structure
+supported natively by C, everything must be implemented by an external
+library or by the programmer. They are a powerful problem solving tool
+and is a basis for many efficient data structures and algorithms.
+
+Take note of the following notation I use:
+
+1. $$A[1...n]$$ denotes an array of size $$n$$
+2. $$A[i]$$ denotes accessing the $$i$$-th element of $$A$$. **Note that unlike C arrays, these arrays are one-indexed i.e the first element is at $$A[1]$$ rather than $$A[0]$$**
+3. $$A[i] = m$$ denotes writing the value $$m$$ into $$A[i]$$.
+
+## Question 1: ID
+The question gives a table containing characters indexed by integers in
+the range $$[0...12]$$. The simplest solution using previous
+techniques we know is to use nested `if..else` statements. This is
+pretty ugly and unwieldly, however, and we want to be more concise.
+We can simply declare an array like so
+
+{% highlight c %}
+char check_codes[] = {
+    'Y', 'X', 'W', 'U', 'R', 'N', 'M', 'L', 'J', 'H', 'E', 'A', 'B'
+}
+{% endhighlight %}
+
+We can get the size of the array using
+
+```c
+long siz = sizeof(check_codes) / sizeof(check_codes[0]);
+```
+
+Then access the appropriate check code using `sum_of_digits(id) % siz`
+as the index. `sum_of_digits` can be implemented as a modification of
+the algorithm from Assignment 1.
+
+## Question 2: Kendall
+The question is pretty long so I will summarise it here. In short,
+let $$A[i]$$ and $$A[j]$$ be any pair of elements in the array. We
+say that an **inversion** exists between $$A[i]$$ and $$A[j]$$ if both
+$$A[i] > A[j]$$ and $$i < j$$.
+
+In the worst case, with an array with $$n$$ distinct elements that is
+reverse-sorted, the total number of inversions is:
+
+$$
+(n - 1) + (n - 2) + \ldots + 1 = \frac{n(n-1)}{2}
+$$
+
+In this question, we are tasked in calculating the total number of
+inversions in the input array of size $$n$$, then, we find its ratio
+with respect to the total possible number of inversions for an array
+of size $$n$$.
+
+The algorithm is simply to consider every element $$A[i]$$, then
+check all $$A[j]$$ for $$j > i$$. If $$A[i] > A[j]$$, then add one to
+the number of inversions. Then, take this count and divide it by the
+formula above.
+
+## Question 3: Max
+In this question, we are revisiting the algorithm shown in the first
+few lectures, and putting a recursive twist on it. However, we are not
+going to be doing simple linear recursion, rather, we are doing a
+divide-and-conquer approach to finding the max. Fortunately, the
+question already provides the algorithm for you.
+
+The algorithm works as follows:
+
+* Split the input list into two halves
+* Find the maximum in the left half, call this $$a$$
+* Find the maximum in the right half, call this $$b$$
+* Return the larger of $$a$$ and $$b$$
+
+If you've "gotten it" just from this explanation, sad to say that the
+rest of the explanation won't value add to your learning. Otherwise,
+feel free to read on.
+
+Remember that when designing a recursive function, we need to answer
+three questions:
+
+1. What is the base case?
+    - A list of size one, which we can determine by `start == end`. The max will be the singular element inside the list
+2. Can we solve larger problem sizes using smaller problem sizes?
+    - Yes, at any stage of the recursion, the max of the currently considered sub-list is the max of the left sub-sub-list and the right sub-sub-list
+3. From any problem size, are we able to recursively move towards the base case?
+    - We are cutting the list into half at every recursive call, so we will always hit the base case eventually for any positive $$n$$
+
+Using a small example, I've drawn an illustration of the algorithm
+below:
+
+With that said, the following is the complete recursive algorithm. If
+you still don't "get it", try tracing the algorithm below for a small
+problem size (e.g $$n = 5$$) i.e draw the diagram above while following
+the code.
+
+{% highlight c %}
+algorithm RecursiveMax(A[1...n], left, right):
+    if left == right: // base case
+        return A[left]
+    mid = (left + right) / 2
+    left_max = RecursiveMax(A, left, mid) // find left
+    right_max = RecursiveMax(A, mid + 1, right) // find right
+    return left_max if left_max > right_max else right_max // return larger of two
+{% endhighlight %}
+
+
+## Question 4: Counting Sort
+Counting Sort is a fast sorting algorithm that can sort an array of
+keys that each have an associated integer value. In this case, we are
+simply sorting non-negative integers so there's no fancy pre-processing
+step involved.
+
+The logic of counting sort is this: let $$A[1...n]$$ be the input
+array, and $$k$$ be the maximum element[^1] of $$A$$. Let
+$$CountSort[0...k]$$ be an array that counts the *frequency* of each
+integer that can occur in $$A$$. For any integer
+$$m$$ that occurs $$p$$ times in $$A$$, $$CountSort[m] = p$$.
+
+After we build $$CountSort$$, all we have to do is run through it and print out
+every $$m$$, $$p$$ times. By doing this, we only ever read each element
+from $$A$$ exactly once.
+
+{% highlight c %}
+algorithm CountingSort( A[1...n] ):
+    k = max(A)
+    initialise CountSort[1...k] = { 0 }
+
+    // O(n)
+    for each integer, m, in A:
+        CountSort[m] += 1
+
+    // O(n + k)
+    for each index, m, in CountSort:
+        p = CountSort[m]
+        print m for p times
+{% endhighlight %}
+
+The actual intricacies of the question's requirements are left up to
+you. Once you figure out how to create the $$CountSort$$ array,
+everything else should be a cakewalk.
+
+<!--
+The first loop runs in $$O(n)$$, and the second loop runs in $$O(n + k)$$.
+Counting Sort thus runs in $$O(n + k)$$, where $$k$$ is the maximum of the integers
+inside the list. The algorithm runs fast as long as $$k$$ is limited,
+but if $$k$$ is very large, then the time and space complexity explodes
+to be likely slower than even comparison-based sorting algorithms that
+have $$\Omega{(n \log{n})}$$ lower-bound run-time.
+
+For example, consider the following algorithm that generates an input
+array of size $$n$$ to be input into $$CountingSort$$:
+
+{% highlight c %}
+algorithm GenerateArray(n):
+    initialise A[1...n]
+    for i in range [1...n]:
+        A[i] = 2^i
+    shuffle(A)
+    return A
+{% endhighlight %}
+
+The run-time of $$CountingSort$$ on any array output by this function
+will be $$\Theta{(2^n)}$$.
+-->
+
+[^1]: A better algorithm would be to have $$k = range(A)$$, but I use this for simplicity.

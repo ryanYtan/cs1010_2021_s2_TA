@@ -1,0 +1,365 @@
+---
+layout: post
+title:  "Assignment 2"
+date:   2021-02-19 16:00:00 +0800
+---
+
+Assignment 2 introduces loops. Loops are exactly what they sound like:
+they allow you to repeat a piece of code as many as times as you want.
+The most basic form of loop is the `while` loop, and all loops can be
+converted into a `while` loop.
+
+I will be stating the time complexity of the algorithm in each
+question in Big-$$O$$ notation from this assignment
+onwards. **This is not relevant yet and you may ignore it**, but will
+be in later chapters of this class.
+
+## Question 1: Collatz
+In this question, we have to implement the $$3n+1$$ conjecture. If
+$$n$$ is even, divide it by 2. Otherwise, triple it and add one.
+Terminate if $$n$$ becomes 1. I really don't know what else to say, so
+I'm just going to give the pseudocode here.
+
+{% highlight c %}
+algorithm Collatz(n):
+    stop_time = 0
+    while n != 1:
+        if n is even:
+            n /= 2
+        else:
+            n = 3n + 1
+        stop_time += 1
+    return stop_time
+{% endhighlight %}
+
+To find the number with the largest stopping time, we need two variables.
+One to store the current number with the largest stopping time, and
+another to store its corresponding stopping time. We just loop from
+$$1$$ to $$n$$, and update the variables as we go along:
+
+{% highlight c %}
+algorithm LargestStopTime(n):
+    stop_time = -1
+    num = -1
+    for i in range [1...n]:
+        i_stop_time = Collatz(i)
+        if i_stop_time > stop_time:
+            stop_time = i_stop_time
+            num = i
+    return i
+{% endhighlight %}
+
+
+### Recursive Formulation
+The Collatz conjecture can be implemented recursively. The base case
+is when $$n = 1$$.
+
+{% highlight c %}
+algorithm Collatz(n, stop_time):
+    if n == 1:
+        return stop_time
+    if n is even:
+        return Collatz(n / 2, stop_time + 1)
+    else:
+        return Collatz(3n + 1, stop_time + 1)
+{% endhighlight %}
+
+We can call this function with `Collatz(n, 0)`.
+
+## Question 2: Triangle
+This question is a build-up to Question 4.
+
+We are tasked with drawing an isoceles triangle to the screen. We are
+given an input height $$h$$, and each row should have exactly $$2h - 1$$
+total characters (excluding new lines only).
+
+The easiest way to figure this out is to draw a small example, and find
+a pattern. Let's take the example from the sample input (I've replaced
+the spaces with `.` to make it easier to see):
+
+```
+5
+....#....
+...###...
+..#####..
+.#######.
+#########
+```
+
+In this case, each row has $$2(5) - 1 = 9$$ characters. Let's write out
+a triplet of numbers at each row: the number of leading whitespaces,
+the number of hexes, and the number of trailing whitespaces:
+
+```
+k = 1  ....#....   4 1 4
+k = 2  ...###...   3 3 3
+k = 3  ..#####..   2 5 2
+k = 4  .#######.   1 7 1
+k = 5  #########   0 9 0
+```
+
+We can reasonably deduce that the number of leading (or trailing)
+whitespaces is related to $$h$$. Specifically, it seems to be equal
+to $$h - k$$.
+
+Since the number of leading whitespaces is equal to the number of
+trailing whitespaces, the total number of whitespaces at row $$k$$ is
+given by $$2(h - k)$$. Each row has $$2h - 1$$ characters, so the
+number of hexes at row $$k$$ is the difference of the two i.e $$(2h - 1) - 2(h - k)$$.
+
+Using this information, we can determine the number of spaces and hexes
+to print at any $$k$$-th row, only with the value of $$k$$ and $$h$$.
+
+{% highlight c %}
+algorithm draw_row(h, k):
+    n_spaces = h - k
+    n_hexes = (2h - 1) - 2(h - k)
+    print n_spaces number of ' '
+    print n_hexes number of '#'
+    print n_spaces number of ' '
+    print '\n' // newline character
+
+algorithm draw_triangle(h):
+    for i in range[1...h]:
+        draw_row(h, i)
+{% endhighlight %}
+
+Note that this is how many algorithmic problems are (informally)
+reasoned about and eventually solved in code. Solving a problem of size
+$$n$$ is abstract and difficult to reason with, so, we think about
+a smaller, concrete problem size to play around with the problem. Once
+we have a solution, we *try* (we may fail to consider all edge cases)
+to generalise it to a problem size of $$n$$, then let the computer
+handle the rest.
+
+We are printing to a canvas of dimensions $$h \times 2h - 1$$. Each
+printing of a character takes $$O(1)$$ time, and therefore
+the algorithm runs in $$O(h^2)$$.
+
+## Question 3: Prime
+This question is a build-up to Question 4.
+
+In this question, we are required to check if a number $$n$$ is prime.
+You are *not* expected to use any fancy algorithms e.g
+ECPP, Miller-Rabin, AKS, etc.
+
+The simplest way to check for primality of an integer $$n$$, and the
+one expected of you in this question, is to test all of its possible
+divisors. This is also known as **trial division**, and a basic
+implementation of it is as follows:
+
+{% highlight c %}
+algorithm IsPrime(n):
+    if n == 1:
+        return FALSE
+    i = 2
+    while i < n:
+        if i divides n:
+            return FALSE
+        i += 1
+    return TRUE
+{% endhighlight %}
+
+One caveat of the question is that all inputs in the `inputs/` folder
+given should run in under two minutes on the PE nodes. If you had used
+this particularly algorithm, you would have noticed that the later test
+cases run *extremely* slow. Slow enough, that the last test case ran
+for about 30 minutes before I gave up and terminated the process.
+Micro-optimisations will not help here, we have to use a bit of math to
+speed it up.
+
+The algorithm spends most of its time in the `while`-loop, so if we can
+decrease the number of iterations, we can also heavily decrease the
+overall real-world running time of the algorithm. A simple optimisation
+is - instead of checking divisors until $$n$$, we only need to check
+until $$\frac{n}{2}$$, since any divisor greater than $$\frac{n}{2}$$
+but less than $$n$$ will need to be multiplied by some real number
+$$1 < d < 2$$ to equal $$n$$. Extending this idea further, it turns
+out that we only need to check until $$\sqrt{n}$$ at most [^1].
+
+This cuts down the number of checks we have to do, from roughly $$n$$
+checks to $$\sqrt{n}$$ checks which is a *huge* improvement. For
+scope, if $$n = 9000000000 = 9 \times 10^9$$, then with this
+optimisation, we only need to do roughly $$95000$$ checks. On my PC,
+the last test case runs in less than 30 seconds using this optimisation.
+
+The question states further that we should not do repetitive work i.e
+if we have found evidence that a number is not prime, we should not
+continue checking. This is done above by returning $$FALSE$$
+**immediately** if we have found an $$i$$ that divides $$n$$.
+
+There are other methods to speed up the function, such as recognising
+that all primes after $$2$$ and $$3$$ are of the form $$6k-1$$ and
+$$6k+1$$ for some $$k$$.
+
+The unoptimised algorithm runs in $$O(n)$$, but the math-optimised
+version runs in $$O(\sqrt{n})$$ time[^2].
+
+### Multiplication is Expensive
+If you had used $$i \times i \leq n$$ in your `for`-loop condition,
+you probably would have noticed that the run-time is still extremely
+slow. This is architecture specific and actually means that
+computation of $$i \times i$$ per iteration is very expensive even on
+modern CPUs. It's must faster to compute $$\sqrt{n}$$ first, then
+check with $$i \leq \sqrt{n}$$.
+
+## Question 4: Pattern
+This is a particularly infamous question, affectionately known as the
+"christmas tree problem". I wish I still have my attempts from when I
+did this class, but I'm pretty sure my solution had around 250 lines
+of code and took me 2 days to complete.
+
+The question is confusing, to say the least. I'm not going to go into
+the specifics of the question because I don't think I can explain it
+any better than the question itself, so, I'm going to assume you have
+an understanding of what you have to do for it.
+
+Let's begin with some pre-requisites:
+
+1. We first need a function to check whether a number is prime. We have this from question 3.
+2. The understanding of how to draw an isoceles triangle was completed in question 2.
+
+With that said, let's dive into the question.
+
+As evident by its title, the question is all about **patterns**, in
+particular, are we able to derive the first number of the leading cell
+at the $$k$$-th row using the values of $$n$$ and $$k$$? Using this
+number, are we able to figure out all the possible numbers in a certain
+cell? What about the cells after the leading cell? It turns out that
+many things are linked to the first number in the leading cell, and
+the value of $$n$$ and $$k$$.
+
+First, let's draw an outline for the function of drawing the triangle.
+We have an understanding of this from question 2, so let's put it into
+action:
+
+```c
+algorithm draw_row(n, h, k)
+    n_spaces = h - k
+    n_hexes = (2h - 1) - 2(h - k)
+    print n_spaces number of ' '
+
+    // this is new, we print '#' based on whether a 1 or prime exists in that cell
+    for i in range [1...n_hexes]:
+        if i-th cell has a 1 or prime: // We don't know how to do this yet
+            print '#'
+        else:
+            print ' '
+
+    print n_spaces number of ' '
+    print '\n'
+
+algorithm draw_triangle(n, h):
+    for i in range[1...h]:
+        draw_row(n, h, i)
+```
+
+By *wishful thinking*, we've assumed that we know how to determine
+if the $$i$$-th cell in the $$k$$-th row has a 1 or prime. Now, we need
+to implement it.
+
+The question itself gives some explanations for the first number of the
+leading cell for a row $$k$$.
+
+```
+Each cell in the triangle contains n integers.
+
+The first cell in the first row contains the numbers 1, 2, ..., n.
+
+The leading cell of the next row, Row 2, contains n numbers between n + 1 and
+3n, with an increment of 2: i.e., n + 1, n + 3, n + 5, .., n + (2n - 1).
+
+The leading cell of the next row, Row 3, contains the numbers 3n + 1 and 6n,
+with increment of 3: i.e., 3n + 1, 3n + 4,3n + 7,.. 3n+(3n−2), etc.
+```
+
+The pattern isn't very obvious from this explanation. Further down the
+question, there is an example:
+
+{% highlight c %}
+n=2 h=4
+   #
+  # #
+ ## ##
+# # # #
+
+k = 1: {1,2}
+k = 2: {3,5} {4,6} {5,7}
+k = 3: {7,10} {8,11} {9,12} {10,13} {11,14}
+k = 4: {13,17} {14,18} {15,19} {16,20} {17,21} {18,22} {19,23}
+{% endhighlight %}
+
+We can make some observations from this output using $$n = 2$$.
+
+```
+FIRST NUMBER OF LEADING CELL
+k = 1: 1    0n + 1
+k = 2: 3    1n + 1
+k = 3: 7    3n + 1
+k = 4: 13   6n + 1
+            ^
+            what is this sequence of numbers in each line before the n?
+```
+
+The sequence of numbers preceding the value of $$n$$ suspiciously
+seem to be the [Triangular Numbers](https://en.wikipedia.org/wiki/Triangular_number).
+A closed-form expression for the $$n$$-th triangle number from
+$$n = 0$$ is
+
+$$\triangle_n = \frac{n(n+1)}{2} = \{0, 1, 3, 6, ...\}$$
+
+Using this knowledge, the number of the first number in the leading cell
+in the $$k$$-th row is given by
+
+$$
+(\triangle_{k-1} \times n) + 1
+$$
+
+Therefore, the $$i$$-th cell (starting from $$i = 1$$) in the
+$$k$$-th row has its first number as
+
+$$
+((\triangle_{k-1} \times n) + 1) + (i - 1)
+$$
+
+For each cell, the difference between successive elements is given by
+the row number, $$k$$. With all this information, we can finally write
+the function that checks if the $$i$$-th cell in the $$k$$-th row has
+a prime (or 1):
+
+{% highlight c %}
+// checks if the i-th cell in the k-th row has a prime or 1
+algorithm CellHasPrime(n, k, i):
+    leading_number = ((triangle(k - 1) * n) + 1) + (i - 1)
+    numbers_in_cell = leading_number
+    for j in range [1...n]:
+        if numbers_in_cell is prime or numbers_in_cell is 1:
+            return TRUE
+        numbers_in_cell += k
+    return FALSE
+{% endhighlight %}
+
+Now, the complete algorithm is:
+
+{% highlight c %}
+algorithm draw_row(n, h, k)
+    n_spaces = h - k
+    n_hexes = (2h - 1) - 2(h - k)
+    print n_spaces number of ' '
+    for i in range [1...n_hexes]:
+        if CellHasPrime(n, k, i):
+            print '#'
+        else:
+            print ' '
+    print n_spaces number of ' '
+    print '\n'
+
+algorithm draw_triangle(n, h):
+    for i in range[1...h]:
+        draw_row(n, h, i)
+{% endhighlight %}
+
+---
+
+[^1]: Think about why this is so.
+[^2]: More accurately, the algorithm actually runs in exponential time, since the number of bits required to represent the input is logarithmic in $$n$$. Say $$k$$ is the number of bits required to store $$n$$. Then $$k = \log_2{n}$$. $$k$$ bits can store $$2^k$$ possible values. Therefore, to check if a $$n$$ is prime, in the worst case, we need to check $$O(\sqrt{2^k}) = O(2^{\frac{k}{2}})$$ possible values.
