@@ -158,14 +158,14 @@ Write a program `tokenise` that
 It is guaranteed that the length of each word in the input after reduction is at most 32 characters long.
 
 ```
-$ ./lowercase
+$ ./tokenise
 ThE QuIcK BrOwN fOx
 the
 quick
 brown
 fox
 
-$ ./lowercase
+$ ./tokenise
 I am Gandalf the White. And I come back to you now...
 i
 am
@@ -180,17 +180,17 @@ to
 you
 now
 
-$ ./lowercase
+$ ./tokenise
 ',':;_ ''';:: __a__ '",.__a_;"
 a
 a
 
-$ ./lowercase
+$ ./tokenise
 __a__a__
 a
 a
 
-$ ./lowercase
+$ ./tokenise
 __aa__
 aa
 ```
