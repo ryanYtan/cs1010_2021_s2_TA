@@ -91,7 +91,7 @@ void reverse(char *start, char *end)
 int main()
 {
     char *start = cs1010_read_word(); // e.g "abcde"
-    size_t len = strlen(s);
+    size_t len = strlen(start);
     char *end = start + len - 1;
     reverse(start, end);
     cs1010_println_string(start); // prints "edcba"
@@ -150,9 +150,12 @@ Write a program `tokenise` that
   * Uppercase English letters [`A-Z`]
   * Whitespace
   * Punctuation from the following set: [`!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `-` `.` `/` `:` `;` `<` `=` `>` `?` `@` `[` `\` `]` `^` `_` `{` `|` `}` `~`]
-* Outputs, to the standard output, each word that appears in the reduced input, each on a separate line
+* Outputs, to the standard output, each word that appears in the input, each on a separate line, with
+  * All lowercase letters
+  * All uppercase letters changed to lowercase letters
+  * All punctuation replaced with whitespace
 
-It is guaranteed that the length of each word in the input before tokenisation is at most 32 characters long.
+It is guaranteed that the length of each word in the input after reduction is at most 32 characters long.
 
 ```
 $ ./lowercase
@@ -181,6 +184,15 @@ $ ./lowercase
 ',':;_ ''';:: __a__ '",.__a_;"
 a
 a
+
+$ ./lowercase
+__a__a__
+a
+a
+
+$ ./lowercase
+__aa__
+aa
 ```
 
 
@@ -203,7 +215,7 @@ Write a program `theatre` that
 
 ```
 $ ./theatre
-4 4
+5 5
 5
 1 0
 0 1
