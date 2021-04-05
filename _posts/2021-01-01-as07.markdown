@@ -1,0 +1,134 @@
+---
+layout: post
+title:  "Assignment 7"
+date:   2021-04-05 16:00:00 +0800
+categories: jekyll update
+---
+
+This is about when the questions start containing very long grandfather
+stories. The reasoning is that most problems in the real world aren't purely
+algorithmic or mathematical problems. Your job is to sift through the fluff
+and pick out relevant information that is needed to solve your problem.
+
+## Question 1: Peak
+This is the most difficult question of the bunch. We're given data
+in a specific format and must determine if there is a peak in the
+data, or output "no peak" if there is no peak. The time complexity
+requirement is $$O(\log{n})$$ if all input elevations are distinct,
+or $$O(n)$$ in the worst case if the elevation values are the same.
+The $$O(\log{n})$$ time complexity implies some sort of binary search.
+
+In this case, the binary search conditions considers the "middle"
+element, and its direct left or right neighbours. The key here is to
+draw out a general form of the input data, and consider for all
+possible cases - search left? or search right?
+
+There are actually 8 possible cases
+
+```
+A: / ‾ \   - peak is found
+
+B: _ _ /   - right
+C: / ‾ ‾   - right
+D: _ - ‾   - right
+
+D: \ _ _   - left
+E: ‾ ‾ \   - left
+F: ‾ - _   - left
+
+G: _ _ _   - peak is on either side
+```
+
+In the final case where the elevation is flat, we have to search left
+and right. This is what gives us the worst-case $$O(n)$$ time
+complexity. Pseudo-code for this case is shown below.
+
+{% highlight c %}
+if peak is on either side:
+    left_peak = find_peak(left, mid - 1)
+    right_peak = find_peak(mid + 1, right)
+    if left_peak != -1:
+        return left_peak
+    if right_peak != -1:
+        return right_peak
+    return -1
+{% endhighlight %}
+
+All other cases have a similar search style to binary search.
+
+## Question 2: Sort
+In this question, we have to sort a list that comes in a special format.
+
+The input data comes in the form of a "mountain", where the left
+side is sorted, and the right side is reverse sorted, eventually
+meeting in a "peak". Note that either side does not need to exist,
+the array can be entirely sorted or entirely reverse sorted.
+
+The simplest way to do this is to start from the left and right side
+of the array, and append the smaller element to the output array,
+then move the respective pointer of the element that was just added
+towards the middle of the array. This way, we can use a single loop
+to solve the problem and achieve $$O(n)$$ run-time.
+
+```c
+algorithm Sort(A[1...n], R[1...n]):
+    l_ptr = 1
+    r_ptr = n
+
+    while l_ptr <= r_ptr:
+        if A[l_ptr] < A[r_ptr]:
+            append A[l_ptr] to R
+            l_ptr += 1
+        else:
+            append A[r_ptr] to R
+            r_ptr -= 1
+```
+
+This algorithm is a variant of the $$Merge$$ algorithm, as is usually
+seen from $$MergeSort$$. It is an $$O(n)$$ algorithm to merge
+two sorted lists into one.
+
+## Question 3: Inversion
+Apparently there's a "one-liner" solution to this that can return the
+answer in $$O(1)$$ time? Not sure what it is, but I will give
+the standard $$O(n)$$ algorithm here.
+
+Here's the definition of an inversion from article 3: Let $$i$$ and
+$$j$$ be any pair of elements in the array. We say that an
+**inversion** exists between $$i$$ and $$j$$ if $$i > j$$ and $$j$$
+occurs after $$i$$ in the array.
+
+We know that the left side of the list is sorted and the right is
+reverse sorted. So, consider some element $$i$$ in the sorted part,
+and any $$j$$ in the reverse sorted part. If $$i > j$$, then that
+means an inversion exists between $$i$$ and every element to the
+right of and including $$j$$.
+
+With that, we can simply start from the "peak", manage two pointers
+and "split" outwards.
+
+My algorithm is as follows:
+
+```c
+algorithm Inversions(A[1...n]):
+    // O(n)
+    maxidx = MaxIndex(A)
+
+    l_ptr = maxidx
+    r_ptr = maxidx + 1
+
+    inversions = 0
+
+    // O(n)
+    while l_ptr >= 1 && r_ptr <= n:
+        if a[l_ptr] > a[r_ptr]:
+            inversions += n - r_ptr
+            l_ptr -= 1
+        else:
+            r_ptr += 1
+
+    // add remaining inversions, O(1)
+    rsize = n - maxidx
+    inversions += (rside * (rside - 1)) / 2
+    return inversions
+```
