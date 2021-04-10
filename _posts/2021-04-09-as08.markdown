@@ -1,0 +1,329 @@
+---
+layout: post
+title:  "Assignment 8"
+date:   2021-04-09 16:00:00 +0800
+categories: jekyll update
+---
+
+## Question 1: Walk
+We're given a simple input of two integers denoting $$(x,y)$$
+co-ordinates, and must find out how many ways we can reach these
+co-ordinates from $$(0,0)$$ whilst only being able to move north and
+move east.
+
+The way you're supposed to do this question is to draw out a small
+example and recognise the pattern. If you did not manage to see it,
+take a look below and see if you can spot it:
+
+```
+3 | 1  4  10 20
+2 | 1  3  6  10
+1 | 1  2  3  4
+0 | 1  1  1  1
+   -----------
+    0  1  2  3
+```
+
+We know that to reach $$(0,k)$$ and $$(k,0)$$ for any $$k$$ is $$1$$.
+By observing each cell, one can figure out that the number of paths to reach
+any arbitrary $$(x,y)$$ is the sum of the paths to reach the co-ordinates
+directly west and south of $$(x,y)$$. This can be represented by the
+recurrence relation:
+
+$$
+NPaths(x,y) = F(x,y) =
+\begin{cases}
+    1, & \text{ if } x = 0 \text{ or } y = 0 \\
+    F(x - 1, y) + F(x, y - 1), & \text{ otherwise}
+\end{cases}
+$$
+
+The recursive function is immediate from the recurrence relation:
+
+```c
+algorithm RecursiveWalk( x, y ):
+    if x == 0 || y == 0:
+        return 1
+    return RecursiveWalk(x - 1, y) + RecursiveWalk(x, y - 1)
+```
+
+Yep, this 3-line function is sufficient (in correctness) to solve the
+problem. However, if you had come up with this function and tested
+it, you would have noticed that it is unbelievable slow. Here are some
+test results from my PC:
+
+|Input|Time
+|:--|:--
+|$$F(15, 15)$$|$$0.6s$$
+|$$F(16, 16)$$|$$3.0s$$
+|$$F(17, 17)$$|$$10.3s$$
+|$$F(18, 18)$$|$$41.4s$$
+|$$F(19, 19)$$|$$157.7s$$
+|$$F(20, 20)$$|$$635s$$
+
+As you can tell, it doesn't scale up very well. Why is it so slow?
+The time complexity of `RecursiveWalk` is given by the recurrence:
+
+$$
+T(x,y) = T(x - 1, y) + T(x, y - 1)
+$$
+
+[Solving it requires... Math](https://math.stackexchange.com/questions/206158/solving-recurrence-relation-in-2-variables).
+The solution ends up being:
+
+$$
+T(x,y) = \binom{x + y}{x} = \frac{(x+y)!}{x!((x + y) - x)!} = \frac{(x + y)!}{x!y!}
+$$
+
+Therefore, the time complexity of this algorithm is
+
+$$
+T(x,y) = O\left( \frac{(x + y)!}{x!y!} \right)
+$$
+
+So, the time complexity ends up being _factorial_ in $$x$$ and $$y$$. This
+is an example of [combinatorial explosion](https://en.wikipedia.org/wiki/Combinatorial_explosion)
+and is nowhere near the required $$O(xy)$$ required to solve the
+question.
+
+The hint given is to **think recursively, but solve iteratively**.
+Iteratively implies using loops, but how do we use loops to solve a
+recursive problem?
+
+To the trained eye, this is actually a *Dynamic Programming* problem.
+Don't worry though, you don't need to know that term for this class.
+We need to use our best friend - 2-D arrays. Remember the small
+example I drew above?
+
+```
+3 | 1  4  10 20
+2 | 1  3  6  10
+1 | 1  2  3  4
+0 | 1  1  1  1
+   -----------
+    0  1  2  3
+```
+
+Notice that the values can be represented as a matrix, $$M$$, with $$x$$ rows
+and $$y$$ columns. Every $$M[i][j]$$ represents the solution to
+`RecursiveWalk(i,j)`. So, what we can do is initialise a table like
+so:
+
+```
+x=
+3 | -  -  -  -
+2 | -  -  -  -
+1 | -  -  -  -
+0 | -  -  -  -
+   -----------
+  y=0  1  2  3
+```
+
+We know that any $$F(k,0) = F(0,k) = 1$$, so we can fill it up as such:
+
+```
+x=
+3 | 1  -  -  -
+2 | 1  -  -  -
+1 | 1  -  -  -
+0 | 1  1  1  1
+   -----------
+  y=0  1  2  3
+```
+
+Then we can set each $$M[i][j] = M[i-1][j] + M[i][j-1]$$ for $$i > 0$$
+and $$j > 0$$. Obviously, we need to loop through the table in the
+correct way, so the strategy is to start from $$(1,1)$$, then go
+left-to-right, bottom-to-top. Another way to make the indexing more
+akin to how one normally iterates through a 2-D array, is to reframe
+the problem to start from the top-left corner, and then only allowing
+going south and east, e.g:
+
+```
+x=
+0 | 1  1  1  1
+1 | 1  2  3  4
+2 | 1  3  6  10
+3 | 1  4  10 20
+   -----------
+  y=0  1  2  3
+```
+
+Since the number of times we access each $$M[i][j]$$ does not grow with
+$$x$$ or $$y$$, the time complexity ends up being the dimensions of the
+2-D array, therefore, the algorithm runs in $$O(xy)$$ time.
+
+### Recursive Formulation
+While the solution above uses loops to solve the problem in
+$$O(xy)$$, we can actually refrain from using loops to solve the
+problem while still keeping in the spirit of "storing results to
+subproblems to be used later". The above solution is usually called
+_bottom-up Dynamic Programming_, while this solution is a variant of
+_memoization_ (sometimes referred to as _top-down Dynamic
+Programming_, though some disagree with this naming).
+
+Below is the pseudo-code:
+
+```c
+// dp[0...x][0...y] is ZERO-INDEXED in this case, and all its values
+// are initialized to -1
+algorithm RecursiveWalkMemoization(dp[0...x][0...y], x, y):
+    if x == 0 || y == 0:
+        dp[x][y] = 1
+    if dp[x][y] != -1:
+        return dp[x][y]
+    dp[x - 1][y] = RecursiveWalkMemoization(dp, x - 1, y)
+    dp[x][y - 1] = RecursiveWalkMemoization(dp, x, y - 1)
+
+    return dp[x - 1][y] + dp[x][y - 1]
+```
+
+Unfortunately, it's also more difficult to reason about its time complexity,
+and if you're not well-versed in recursion, this is probably much more difficult
+to understand than the original solution's iterative style.
+
+## Maze
+This question is about recursion with backtracking. This is not an
+easy problem, and I'd say it's one of the two most difficult problems
+in the assignments of this class, along with Assignment 5's Social.
+
+We're given an $$m \times n$$ maze, and we have to print out a maze-solving
+algorithm to the screen.
+
+First, some house-keeping again:
+
+1. We need a function to print the maze with the number of steps to the screen. The skeleton already provides this for you
+2. We need a function to return the location of the `USER`. This can be done with a simple double `for`-loop, and using pointers to return the $$x$$ and $$y$$ values.
+
+With that out of the way, we can get into the proper algorithm. The
+question actually gives it to us:
+
+> She follows **strictly** the following strategy to find a way through
+the maze starting from her initial position. At each time step,
+>
+> 1. She looks for an empty adjacent cell that has never been visited
+yet, in the sequence of up/right/down/left to the current cell she is
+at. If there is an empty adjacent cell, she moves to that cell. The
+cell she moves to is now visited.
+>
+> 2. If no empty, unvisited, adjacent cell exists, she backtracks on
+the path that she comes from, moving one step back, and repeat 1
+again.
+
+Sounds simple enough, but implementing it and *getting the animation on
+the screen* is really the hard part.
+
+First, let's think about the base cases, i.e the point at which recursion
+terminates
+
+1. If the user walks out of bounds of the maze. This is actually the "escape" condition.
+2. If the user walks to a cell that is visited
+3. If the user walks into a wall
+
+Most of these are simple index checking, except for number 2. How do we
+know if a cell is visited? We initialise another 2-D array with the same
+dimensions as the maze, and call it $$V[1...m][1...n]$$ and
+initialise all its values to $$FALSE$$. Whenever we visit a cell,
+we label the corresponding cell to be $$TRUE$$ in $$V$$.
+
+We've gotten most of the menial stuff done, so let's draw an outline
+of the algorithm:
+
+{% highlight c %}
+algorithm solve(maze, visited, m, n, prev_x, prev_y, x, y):
+    if escaped:
+        return TRUE
+    if visited[x][y] or maze[x][y] is a wall:
+        return FALSE
+    visit cell (x,y) // we don't know how to do this
+    if (go_up || go_right || go_down || go_left) // or this
+        return TRUE
+    backtrack // or this
+    return FALSE
+{% endhighlight %}
+
+The use of `||` in the exploration conditions is important. `||`
+short-circuits if any of the conditions are true, which is required
+for the algorithm to terminate correctly if the user successfully
+solves a maze whilst going in a specific direction.
+
+Let's go through the parts that are not filled yet.
+
+### Visiting a cell
+This is easy, we visit a cell by just "moving" the user in the matrix
+$$M$$.
+
+{% highlight c %}
+maze[prev_x][prev_y] = EMPTY
+maze[x][y] = USER
+visited[x][y] = true
+{% endhighlight %}
+
+### Exploration in 4 directions
+We have to recursively call `solve` with different parameters for
+`prev_x`, `prev_y`, `x` and `y`.
+
+`prev_x` and `prev_y` will just be the current values of `x` and `y`.
+While the new values of `x` and `y` are just the the co-ordinates in
+their respective four directions with respect to to the matrix $$M$$
+and the current `x` and `y`.
+
+{% highlight c %}
+if (solve(maze, visited, m, n, x, y, x - 1, y)
+        || solve(maze, visited, m, n, x, y, x, y + 1)
+        || solve(maze, visited, m, n, x, y, x + 1, y)
+        || solve(maze, visited, m, n, x, y, x, y - 1)):
+    return TRUE
+{% endhighlight %}
+
+### Backtracking
+If we're at a particular cell and all attempted traversals to the top,
+right, down and left are unsuccessful, we have to backtrack on the
+path that we come from. We can do this by "resetting" the visiting
+step earlier in the function, i.e
+
+{% highlight c %}
+maze[x][y] = EMPTY
+maze[prev_x][prev_y] = USER
+{% endhighlight %}
+
+### Complete Algorithm
+We now have the (nearly) complete algorithm to solve the maze:
+
+{% highlight c %}
+algorithm solve(maze, visited, m, n, prev_x, prev_y, x, y):
+    if escaped:
+        return TRUE
+    if visited[x][y] or maze[x][y] is a wall:
+        return FALSE
+
+    // visit the cell
+    maze[prev_x][prev_y] = EMPTY
+    maze[x][y] = USER
+    visited[x][y] = true
+
+    // visit up, right, down, left
+    if (solve(maze, visited, m, n, x, y, x - 1, y)
+            || solve(maze, visited, m, n, x, y, x, y + 1)
+            || solve(maze, visited, m, n, x, y, x + 1, y)
+            || solve(maze, visited, m, n, x, y, x, y - 1))
+        return TRUE
+
+    // backtrack
+    maze[x][y] = EMPTY
+    maze[prev_x][prev_y] = USER
+
+    return FALSE
+{% endhighlight %}
+
+Disclaimer: my actual code to solving this problem has quite a bit
+more micro-management of pointers, indices, etc than what the
+pseudo-code implies. This pseudo-code is **not** fully correct, but
+for explaining the intuition behind the backtracking algorithm, this
+is sufficient.
+
+The time complexity of this maze-solving algorithm is intuitively
+guessed from the fact that in the worst case, the algorithm visits
+every cell of the maze at most twice. Therefore, the time
+complexity is simply the number of cells in the maze, which is roughly
+$$m \times n$$, therefore, its run-time is $$O(mn)$$.
