@@ -55,4 +55,7 @@ int main()
     } else {
         printf("no\n");
     }
+
+    free(s);
+    free(t);
 }
