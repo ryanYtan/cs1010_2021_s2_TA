@@ -153,6 +153,34 @@ Since the number of times we access each $$M[i][j]$$ does not grow with
 $$x$$ or $$y$$, the time complexity ends up being the dimensions of the
 2-D array, therefore, the algorithm runs in $$O(xy)$$ time.
 
+### Using Combinatorics
+Using some combinatorics, we can determine the precise formula for the number of
+possible paths to a certain pair of co-ordinates, then use the formula to
+compute the number of paths.
+
+Say we want to reach the co-ordinates $$(3,4)$$. In order to do this, we need to
+go right 3 times, then go up 4 times. Every path to $$(3,4)$$ will be some
+permutation of going right 3 times and going up 4 times, and each permutation
+will be a different path.
+If we imagine "going right" and "going up" as two distinct objects,
+let's say $$R$$ and $$U$$, we can simply reframe the problem as finding the
+number of permutations of a collection of 3 $$R$$s and 4 $$L$$s.
+
+$$
+Permute(RRRLLLL) = \frac{(N_R + N_L)!}{N_R!N_L!} = \frac{(N_R + N_L)!}{N_R!((N_R + N_L) - N_R)!} = \binom{N_R + N_L}{N_R}
+$$
+
+Where $$N_L$$ and $$N_R$$ denote the number of $$L$$ and $$R$$ in the collection
+respectively.  Recall that the formula for the binomial coefficient
+$$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
+
+By using the factorial formula above, we can compute the number of walks to any
+coordinate by using a fast factorial algorithm. Do note that this approach may
+not actually be faster than the dynamic programming method, as for large $$x$$
+and $$y$$, the time complexity of multiplication will stop being constant time,
+and instead be dependent on the number of bits required to represent $$x$$ and
+$$y$$.
+
 ### Recursive Formulation
 While the solution above uses loops to solve the problem in
 $$O(xy)$$, we can actually refrain from using loops to solve the
