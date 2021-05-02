@@ -16,12 +16,13 @@ example and recognise the pattern. If you did not manage to see it,
 take a look below and see if you can spot it:
 
 ```
-3 | 1  4  10 20
-2 | 1  3  6  10
-1 | 1  2  3  4
-0 | 1  1  1  1
-   -----------
-    0  1  2  3
+4 | 1  5  15 35 70
+3 | 1  4  10 20 35
+2 | 1  3  6  10 15
+1 | 1  2  3  4  5
+0 | 1  1  1  1  1
+   --------------
+    0  1  2  3  4
 ```
 
 We know that to reach $$(0,k)$$ and $$(k,0)$$ for any $$k$$ is $$1$$.
@@ -61,8 +62,9 @@ test results from my PC:
 |$$F(19, 19)$$|$$157.7s$$
 |$$F(20, 20)$$|$$635s$$
 
-As you can tell, it doesn't scale up very well. Why is it so slow?
-The time complexity of `RecursiveWalk` is given by the recurrence:
+As you can tell, it doesn't scale up very well. Let's analyze the algorithm to
+see why it is so slow.  The time complexity of `RecursiveWalk` is given by the
+recurrence:
 
 $$
 T(x,y) = T(x - 1, y) + T(x, y - 1)
@@ -96,12 +98,13 @@ We need to use our best friend - 2-D arrays. Remember the small
 example I drew above?
 
 ```
-3 | 1  4  10 20
-2 | 1  3  6  10
-1 | 1  2  3  4
-0 | 1  1  1  1
-   -----------
-    0  1  2  3
+4 | 1  5  15 35 70
+3 | 1  4  10 20 35
+2 | 1  3  6  10 15
+1 | 1  2  3  4  5
+0 | 1  1  1  1  1
+   --------------
+    0  1  2  3  4
 ```
 
 Notice that the values can be represented as a matrix, $$M$$, with $$x$$ rows
@@ -111,24 +114,26 @@ so:
 
 ```
 x=
-3 | -  -  -  -
-2 | -  -  -  -
-1 | -  -  -  -
-0 | -  -  -  -
-   -----------
-  y=0  1  2  3
+4 | -  -  -  -  -
+3 | -  -  -  -  -
+2 | -  -  -  -  -
+1 | -  -  -  -  -
+0 | -  -  -  -  -
+   --------------
+  y=0  1  2  3  4
 ```
 
 We know that any $$F(k,0) = F(0,k) = 1$$, so we can fill it up as such:
 
 ```
 x=
-3 | 1  -  -  -
-2 | 1  -  -  -
-1 | 1  -  -  -
-0 | 1  1  1  1
-   -----------
-  y=0  1  2  3
+4 | 1  -  -  -  -
+3 | 1  -  -  -  -
+2 | 1  -  -  -  -
+1 | 1  -  -  -  -
+0 | 1  1  1  1  1
+   --------------
+  y=0  1  2  3  4
 ```
 
 Then we can set each $$M[i][j] = M[i-1][j] + M[i][j-1]$$ for $$i > 0$$
@@ -141,12 +146,13 @@ going south and east, e.g:
 
 ```
 x=
-0 | 1  1  1  1
-1 | 1  2  3  4
-2 | 1  3  6  10
-3 | 1  4  10 20
-   -----------
-  y=0  1  2  3
+0 | 1  1  1  1  1
+1 | 1  2  3  4  5
+2 | 1  3  6  10 15
+3 | 1  4  10 20 35
+4 | 1  5  15 35 70
+   ---------------
+  y=0  1  2  3  4
 ```
 
 Since the number of times we access each $$M[i][j]$$ does not grow with
@@ -164,14 +170,20 @@ permutation of going right 3 times and going up 4 times, and each permutation
 will be a different path.
 If we imagine "going right" and "going up" as two distinct objects,
 let's say $$R$$ and $$U$$, we can simply reframe the problem as finding the
-number of permutations of a collection of 3 $$R$$s and 4 $$L$$s.
+number of permutations of a collection of 3 $$R$$s and 4 $$U$$s.
 
 $$
-Permute(RRRLLLL) = \frac{(N_R + N_L)!}{N_R!N_L!} = \frac{(N_R + N_L)!}{N_R!((N_R + N_L) - N_R)!} = \binom{N_R + N_L}{N_R}
+Permute(RRR,UUUU) = \frac{(3 + 4)!}{3!4!}
 $$
 
-Where $$N_L$$ and $$N_R$$ denote the number of $$L$$ and $$R$$ in the collection
-respectively.  Recall that the formula for the binomial coefficient
+We can generalise this to any number of $$R$$ and $$U$$. Let $$N_U$$ and $$N_R$$
+denote the number of $$U$$ and $$R$$ in the collection respectively.
+
+$$
+Permute(N_R, N_U) = \frac{(N_R + N_U)!}{N_R!N_U!} = \frac{(N_R + N_U)!}{N_R!((N_R + N_U) - N_R)!} = \binom{N_R + N_U}{N_R}
+$$
+
+Recall that the formula for the binomial coefficient
 $$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
 
 By using the factorial formula above, we can compute the number of walks to any
