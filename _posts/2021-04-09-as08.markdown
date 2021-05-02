@@ -218,6 +218,15 @@ algorithm RecursiveWalkMemoization(dp[0...x][0...y], x, y):
     return dp[x - 1][y] + dp[x][y - 1]
 ```
 
+For such an algorithm, the run-time is given by
+
+$$
+T(n) = N_{\text{subproblems}} \cdot (\text{time required per subproblem})
+$$
+
+In this case, we have $$O(xy)$$ subproblems, while each subproblem requires
+a single addition, so $$T(n) = O(xy) + O(1) = O(xy)$$.
+
 Unfortunately, it's also more difficult to reason about its time complexity,
 and if you're not well-versed in recursion, this is probably much more difficult
 to understand than the original solution's iterative style.

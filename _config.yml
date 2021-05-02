@@ -24,7 +24,7 @@ description: >-
   Supplementary information for CS1010
 baseurl: "/cs1010_2021_s2_TA" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: FakeTwitterUsername
+twitter_username: DoesNotExist
 github_username:  ryanYtan
 
 theme: minima
