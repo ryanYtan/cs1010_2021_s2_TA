@@ -119,40 +119,55 @@ step involved.
 
 The logic of counting sort is this: let $$A[1...n]$$ be the input
 array, and $$k$$ be the maximum element[^1] of $$A$$. Let
-$$CountSort[0...k]$$ be an array that counts the *frequency* of each
+$$Count[0...k]$$ be an array that counts the *frequency* of each
 integer that can occur in $$A$$. For any integer
-$$m$$ that occurs $$p$$ times in $$A$$, $$CountSort[m] = p$$.
+$$m$$ that occurs $$p$$ times in $$A$$, $$Count[m] = p$$.
 
-After we build $$CountSort$$, all we have to do is run through it and print out
+After we build $$Count$$, all we have to do is run through it and print out
 every $$m$$, $$p$$ times. By doing this, we only ever read each element
 from $$A$$ exactly once.
 
-{% highlight c %}
+```c
 algorithm CountingSort( A[1...n] ):
     k = max(A)
     initialise CountSort[1...k] = { 0 }
 
     // O(n)
     for each integer, m, in A:
-        CountSort[m] += 1
+        Count[m] += 1
 
     // O(n + k)
-    for each index, m, in CountSort:
-        p = CountSort[m]
+    for each index, m, in Count:
+        p = Count[m]
         print m for p times
-{% endhighlight %}
+```
 
 The actual intricacies of the question's requirements are left up to
 you. Once you figure out how to create the $$CountSort$$ array,
 everything else should be a cakewalk.
 
-<!--
-The first loop runs in $$O(n)$$, and the second loop runs in $$O(n + k)$$.
-Counting Sort thus runs in $$O(n + k)$$, where $$k$$ is the maximum of the integers
-inside the list. The algorithm runs fast as long as $$k$$ is limited,
+### Why is the second loop $$O(n+k)$$ and not $$O(nk)$$?
+The second loop _looks_ like we are looping over an array of $$k$$
+size, and in the worst case, we are printing out $$n$$ values for each
+iteration.
+
+However, is that really true? Note that the value of each $$Count[i]$$ is the
+number of times $$i$$ occurs in the original array $$A$$. So, the sum of all
+values in $$Count$$ should equal $$n$$. If $$Count[i] = n$$ for every $$i$$,
+then the number of elements counted by $$Count$$ exceeds $$n$$!
+
+For that particular loop, the total number of iterations are
+
+* $$O(k)$$ - in order to iterate over the $$k$$ elements of $$Count$$
+* $$O(n)$$ - in order to print out $$n$$ elements to the standard output
+
+This leads to an $$O(n+k)$$ run-time.
+
+### Time Complexity of unrestricted $$k$$
+The algorithm runs fast as long as $$k$$ is limited,
 but if $$k$$ is very large, then the time and space complexity explodes
 to be likely slower than even comparison-based sorting algorithms that
-have $$\Omega{(n \log{n})}$$ lower-bound run-time.
+have $$\Omega{(n \log{n})}$$[^2] lower-bound run-time.
 
 For example, consider the following algorithm that generates an input
 array of size $$n$$ to be input into $$CountingSort$$:
@@ -168,6 +183,6 @@ algorithm GenerateArray(n):
 
 The run-time of $$CountingSort$$ on any array output by this function
 will be $$\Theta{(2^n)}$$.
--->
 
 [^1]: A better algorithm would be to have $$k = range(A)$$, but I use this for simplicity.
+[^2]: Just like how big-$$O$$ is the "upper-bound" on the run-time, big-$$\Omega$$ is the "lower-bound" on the run-time (i.e this is the _best_ that this algorithm can run)

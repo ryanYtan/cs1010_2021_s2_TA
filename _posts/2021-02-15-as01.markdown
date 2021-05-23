@@ -4,18 +4,11 @@ title:  "Assignment 1"
 date:   2021-02-15 16:00:00 +0800
 ---
 
-The main focus of Assignment 1 is on
-**breaking down problems into smaller sub-problems**. This skill
-will be necessary in every non-trivial programming problem, so
-hopefully you have thought about this in the process of solving each
-problem.
-
 ## Question 1: Box
 ![box]({{ site.baseurl }}/assets/images/box.jpg){:height="150px"}
 
-In this question, our goal is to find the surface area and
-"diagonal" of a box (cuboid). Since this question in particular is
-mainly about C data-typing, I have to give real code for this question.
+The goal of this question is to find the surface area and "diagonal"
+of a box (cuboid), as depicted in the image above.
 
 ### Surface Area
 For the surface area, the question asks you to define a new function
@@ -190,9 +183,9 @@ F(1234) & = 4^2 + F(123) \\
 \end{align*}
 $$
 
-### Recurrence Relation
+### As a Recurrence Relation
 
-We can actually express the above recursive formulation using a math expression
+We can express the above recursive formulation using a math expression
 (called a recurrence relation):
 
 $$

@@ -169,26 +169,25 @@ size_t fill_buffer(char *buf, size_t len) {
 Write a rough description (in prose), how the `cs1010_read_word()` function works.
 
 ## Hopscotch
-You are playing a special game of hopscotch on a special grid. We
-represent the "squares" we are jumping in with a 1-dimensional array,
-and we are initially positioned at index 0. At each square, we can either
+You are playing a special game of hopscotch on a special grid. We are
+initially positioned at the 0-th square. At each square, we can either
 
 * jump **1** square forward, or
 * jump **2** squares forward
 
+Let $$H(n)$$ be the number of ways we can reach the $$n$$-th square ($$n \geq 1$$) in this special hopscotch game.
 Fill up the brackets labeled with $$...$$ in the following recurrence relation:
 
 $$
-HopScotch(n) = H(n) =
+H(n) =
 \begin{cases}
-1 & \text{ if } n = 1 \\
-2 & \text{ if } n = 2 \\
-H(...) + H(...) & \text{ otherwise}
+... & \text{ if } n = ... \\
+... & \text{ if } n = ... \\
+... & \text{ otherwise}
 \end{cases}
 $$
 
 _**Hint**: Work out the problem for small values of $$n$$ and guess the pattern._
-
 
 ## Set Equality
 We define a _decision problem_ as a problem with a YES or NO answer. For example:
@@ -198,8 +197,8 @@ is not a decision problem.
 
 We use the same definition of "efficient" as above i.e solvable in polynomial time.
 
-Define the set of problems $$E$$, that contains all "easy" problems that can be solved
-efficiently, and the set of "hard" problems $$H$$, that is the set of problems that
+Define the set of problems $$E$$, that contains all "easy" decision problems that can be solved
+efficiently, and the set of "hard" decision problems $$H$$, that is the set of problems that
 _may_ be able to be solved efficiently, but at least, a YES answer can be checked efficiently.
 
 Do you think the above two sets are equivalent? i.e does $$E = H$$? Justify your answer.
